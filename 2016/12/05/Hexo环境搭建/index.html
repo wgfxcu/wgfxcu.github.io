@@ -41,7 +41,7 @@
 <link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="hexo,GitHubPage," />
 
 
 
@@ -57,15 +57,37 @@
 
 
 
-<meta name="description" content="取象于钱, 外圆内方">
-<meta property="og:type" content="website">
-<meta property="og:title" content="wgfxcu">
-<meta property="og:url" content="http://yoursite.com/index.html">
+<meta name="description" content="前言之前无意中发现conglang的github博客，简洁干净，符合我的style。后来发现他使用HEXO+GitHub+Next主题搭建的。按耐不住就索性自己也来一个。同时也记录一下自己的实现过程，做个备案。
+推荐理由:
+免费：github提供gh-pages服务是免费的，有300MB空间；    
+开源：由于github开源的原因，有很多人参与其中，自然技术支持很好。     
+便捷：博客完全">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo搭建GitHub博客（一）- 环境搭建">
+<meta property="og:url" content="http://yoursite.com/2016/12/05/Hexo环境搭建/index.html">
 <meta property="og:site_name" content="wgfxcu">
-<meta property="og:description" content="取象于钱, 外圆内方">
+<meta property="og:description" content="前言之前无意中发现conglang的github博客，简洁干净，符合我的style。后来发现他使用HEXO+GitHub+Next主题搭建的。按耐不住就索性自己也来一个。同时也记录一下自己的实现过程，做个备案。
+推荐理由:
+免费：github提供gh-pages服务是免费的，有300MB空间；    
+开源：由于github开源的原因，有很多人参与其中，自然技术支持很好。     
+便捷：博客完全">
+<meta property="og:image" content="http://yoursite.com/2016/12/05/Hexo环境搭建/github-download.png">
+<meta property="og:image" content="http://yoursite.com/2016/12/05/Hexo环境搭建/github-signup.png">
+<meta property="og:image" content="http://yoursite.com/2016/12/05/Hexo环境搭建/github-login.png">
+<meta property="og:image" content="http://yoursite.com/2016/12/05/Hexo环境搭建/github-newrepository.png">
+<meta property="og:image" content="http://yoursite.com/2016/12/05/Hexo环境搭建/github-repositoryinfo.png">
+<meta property="og:image" content="http://yoursite.com/2016/12/05/Hexo环境搭建/github-setting.png">
+<meta property="og:image" content="http://yoursite.com/2016/12/05/Hexo环境搭建/github-sshkeys.png">
+<meta property="og:image" content="http://yoursite.com/2016/12/05/Hexo环境搭建/githug-addsshkeys.png">
+<meta property="og:updated_time" content="2016-12-06T10:25:39.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="wgfxcu">
-<meta name="twitter:description" content="取象于钱, 外圆内方">
+<meta name="twitter:title" content="Hexo搭建GitHub博客（一）- 环境搭建">
+<meta name="twitter:description" content="前言之前无意中发现conglang的github博客，简洁干净，符合我的style。后来发现他使用HEXO+GitHub+Next主题搭建的。按耐不住就索性自己也来一个。同时也记录一下自己的实现过程，做个备案。
+推荐理由:
+免费：github提供gh-pages服务是免费的，有300MB空间；    
+开源：由于github开源的原因，有很多人参与其中，自然技术支持很好。     
+便捷：博客完全">
+<meta name="twitter:image" content="http://yoursite.com/2016/12/05/Hexo环境搭建/github-download.png">
 
 
 
@@ -83,7 +105,7 @@
   };
 </script>
 
-  <title> wgfxcu - 取象于钱, 外圆内方 </title>
+  <title> Hexo搭建GitHub博客（一）- 环境搭建 | wgfxcu </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -104,9 +126,7 @@
     
   
 
-  <div class="container one-collumn sidebar-position-right 
-   page-home 
- ">
+  <div class="container one-collumn sidebar-position-right page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -216,9 +236,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
   
@@ -238,10 +258,7 @@
             
             
               
-                
-                <a class="post-title-link" href="/2016/12/05/Hexo环境搭建/" itemprop="url">
-                  Hexo搭建GitHub博客（一）- 环境搭建
-                </a>
+                Hexo搭建GitHub博客（一）- 环境搭建
               
             
           </h1>
@@ -299,9 +316,7 @@
       
 
       
-        
-          
-            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前无意中发现<a href="http://conglang.github.io/" target="_blank" rel="external">conglang</a>的github博客，简洁干净，符合我的style。后来发现他使用HEXO+GitHub+Next主题搭建的。按耐不住就索性自己也来一个。同时也记录一下自己的实现过程，做个备案。</p>
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前无意中发现<a href="http://conglang.github.io/" target="_blank" rel="external">conglang</a>的github博客，简洁干净，符合我的style。后来发现他使用HEXO+GitHub+Next主题搭建的。按耐不住就索性自己也来一个。同时也记录一下自己的实现过程，做个备案。</p>
 <h3 id="推荐理由"><a href="#推荐理由" class="headerlink" title="推荐理由:"></a>推荐理由:</h3><ol>
 <li>免费：<a href="https://github.com/" target="_blank" rel="external">github</a>提供gh-pages服务是免费的，有300MB空间；    </li>
 <li>开源：由于github开源的原因，有很多人参与其中，自然技术支持很好。     </li>
@@ -367,32 +382,39 @@ but GitHub does not provide shell access.
 </code></pre></li>
 </ol>
 
-          
-        
       
     </div>
 
     <div>
       
+        
+      
     </div>
 
     <footer class="post-footer">
       
-
+        <div class="post-tags">
+          
+            <a href="/tags/hexo/" rel="tag">#hexo</a>
+          
+            <a href="/tags/GitHubPage/" rel="tag">#GitHubPage</a>
+          
+        </div>
       
 
       
+
       
-        <div class="post-eof"></div>
       
     </footer>
   </article>
 
 
-    
-  </section>
 
-  
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -400,6 +422,10 @@ but GitHub does not provide shell access.
 
 
           
+  <div class="comments" id="comments">
+    
+  </div>
+
 
         </div>
         
@@ -419,8 +445,17 @@ but GitHub does not provide shell access.
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel  sidebar-panel-active ">
+      <section class="site-overview sidebar-panel ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/uploads/avatar.png"
@@ -472,6 +507,17 @@ but GitHub does not provide shell access.
 
       </section>
 
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#推荐理由"><span class="nav-number">1.1.</span> <span class="nav-text">推荐理由:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#需要了解的内容（能掌握更好）："><span class="nav-number">1.2.</span> <span class="nav-text">需要了解的内容（能掌握更好）：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装-Git-NodeJS-环境"><span class="nav-number">2.</span> <span class="nav-text">安装 Git + NodeJS 环境</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装-Git"><span class="nav-number">2.1.</span> <span class="nav-text">安装 Git</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#注册-GitHub"><span class="nav-number">2.2.</span> <span class="nav-text">注册 GitHub</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建仓库"><span class="nav-number">2.3.</span> <span class="nav-text">创建仓库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置-SSH"><span class="nav-number">2.4.</span> <span class="nav-text">配置 SSH</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
       
 
     </div>
@@ -556,6 +602,10 @@ but GitHub does not provide shell access.
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=0.5.0"></script>
+
+
 
   
 
