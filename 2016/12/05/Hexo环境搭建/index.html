@@ -79,7 +79,8 @@
 <meta property="og:image" content="http://yoursite.com/2016/12/05/Hexo环境搭建/github-setting.png">
 <meta property="og:image" content="http://yoursite.com/2016/12/05/Hexo环境搭建/github-sshkeys.png">
 <meta property="og:image" content="http://yoursite.com/2016/12/05/Hexo环境搭建/githug-addsshkeys.png">
-<meta property="og:updated_time" content="2016-12-06T10:25:39.000Z">
+<meta property="og:image" content="http://yoursite.com/2016/12/05/Hexo环境搭建/nvm-node.png">
+<meta property="og:updated_time" content="2016-12-07T05:44:42.252Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Hexo搭建GitHub博客（一）- 环境搭建">
 <meta name="twitter:description" content="前言之前无意中发现conglang的github博客，简洁干净，符合我的style。后来发现他使用HEXO+GitHub+Next主题搭建的。按耐不住就索性自己也来一个。同时也记录一下自己的实现过程，做个备案。
@@ -331,7 +332,7 @@
 <blockquote>
 <p><strong>说明：</strong><br>本次搭建的环境是：Ubuntu14.04      </p>
 </blockquote>
-<h2 id="安装-Git-NodeJS-环境"><a href="#安装-Git-NodeJS-环境" class="headerlink" title="安装 Git + NodeJS 环境"></a>安装 Git + NodeJS 环境</h2><h3 id="安装-Git"><a href="#安装-Git" class="headerlink" title="安装 Git"></a>安装 Git</h3><ol>
+<h2 id="安装-Git"><a href="#安装-Git" class="headerlink" title="安装 Git"></a>安装 Git</h2><h3 id="安装-Git-客户端"><a href="#安装-Git-客户端" class="headerlink" title="安装 Git 客户端"></a>安装 Git 客户端</h3><ol>
 <li>安装 Git 客户端 <a href="http://git-scm.com/downloads" target="_blank" rel="external">下载地址</a><img src="/2016/12/05/Hexo环境搭建/github-download.png" alt="Git客户端安装" title="Git客户端安装">      </li>
 <li>安装Git客户端：Windows用户直接Next就可以了。Mac和Linxu系统的用户可通过命令方式安装，这里不详细介绍了。        </li>
 <li>附上廖雪峰的Git经典入门教程: <a href="http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000" target="_blank" rel="external">Git入门教程</a> </li>
@@ -381,6 +382,34 @@ Are you sure you want to continue connecting (yeso)?
 but GitHub does not provide shell access.
 </code></pre></li>
 </ol>
+<h2 id="搭建-Node-js-开发环境"><a href="#搭建-Node-js-开发环境" class="headerlink" title="搭建 Node.js 开发环境"></a>搭建 Node.js 开发环境</h2><p>本次没有使用ubuntu自带的nodejs版本，实在是版本太低。也没有使用源码进行安装，实在是太麻烦。根据<a href="https://hexo.io/zh-cn/docs/index.html" target="_blank" rel="external">Hexo官方文档</a>使用<a href="https://github.com/creationix/nvm" target="_blank" rel="external">nvm</a>管理和安装Node.js。<br>nvm 的全称是 Node Version Manager，之所以需要这个工具，是因为 Node.js 的各种特性都没有稳定下来，所以我们经常由于老项目或尝新的原因，需要切换各种版本。</p>
+<h3 id="安装-nvm"><a href="#安装-nvm" class="headerlink" title="安装 nvm"></a>安装 nvm</h3><p>cURL:</p>
+<pre><code>$ curl https://raw.github.com/creationix/nvm/master/install.sh | sh
+</code></pre><p>Wget:</p>
+<pre><code>$ wget -qO- https://raw.github.com/creationix/nvm/master/install.sh | sh
+</code></pre><p>脚本下载nvm仓库下载到 <code>~/.nvm</code> , 同时在你的配置文件中添加源代码行 <code>(~/.bash_profile, ~/.zshrc, ~/.profile, or ~/.bashrc)</code>。           </p>
+<pre><code>export NVM_DIR=&quot;$HOME/.nvm&quot;
+[ -s &quot;$NVM_DIR/nvm.sh&quot; ] &amp;&amp; . &quot;$NVM_DIR/nvm.sh&quot; # This loads nvm
+</code></pre><p>如果你在shell命令行中输入nvm，得到的是 <code>nvm: command not found</code>。你需要在命令行中执行以下命令：</p>
+<pre><code>source ~/.bashrc
+</code></pre><h3 id="安装切换各版本-node-npm"><a href="#安装切换各版本-node-npm" class="headerlink" title="安装切换各版本 node/npm"></a>安装切换各版本 node/npm</h3><pre><code>nvm install stable #安装最新稳定版 node，现在是 v7.2.0
+nvm install 6.0.0 #安装 6.0.0 版本
+nvm install 0.12.7 #安装 0.12.7 版本
+
+# 特别说明：以下模块安装仅供演示说明，并非必须安装模块
+nvm use 0 #切换至 0.12.7 版本
+nvm use 6 #切换至 6.0.0 版本
+nvm alias default 7.2.0 #设置默认 node 版本为 7.2.0
+</code></pre><p>这时候可以看到自己安装的所有 Node.js 版本，输出应如下：<br><img src="/2016/12/05/Hexo环境搭建/nvm-node.png" alt="查看node版本" title="查看node版本">     </p>
+<h3 id="使用-nvmrc-文件配置项目所使用的-node-版本"><a href="#使用-nvmrc-文件配置项目所使用的-node-版本" class="headerlink" title="使用 .nvmrc 文件配置项目所使用的 node 版本"></a>使用 .nvmrc 文件配置项目所使用的 node 版本</h3><p>如果你的默认 node 版本（通过 nvm alias 命令设置的）与项目所需的版本不同，则可在项目根目录或其任意父级目录中创建 .nvmrc 文件，在文件中指定使用的 node 版本号，例如：   </p>
+<pre><code>cd &lt;项目根目录&gt;  #进入项目根目录
+echo 7 &gt; .nvmrc #添加 .nvmrc 文件
+nvm use #无需指定版本号，会自动使用 .nvmrc 文件中配置的版本
+node -v #查看 node 是否切换为对应版本
+</code></pre><h3 id="nvm-与-n-的区别"><a href="#nvm-与-n-的区别" class="headerlink" title="nvm 与 n 的区别"></a>nvm 与 n 的区别</h3><p>node 版本管理工具还有一个是 <em><a href="https://github.com/tj/n" target="_blank" rel="external">TJ 大神的 n</a></em> 命令，n 命令是作为一个 node 的模块而存在，而 nvm 是一个独立于 node/npm 的外部 shell 脚本，因此 n 命令相比 nvm 更加局限。</p>
+<p>由于 npm 安装的模块路径均为 <code>/usr/local/lib/node_modules</code> ，当使用 n 切换不同的 node 版本时，实际上会共用全局的 node/npm 目录。 因此不能很好的满足『按不同 node 版本使用不同全局 node 模块』的需求。</p>
+<p>因此建议各位尽早开始使用 nvm ，以免出现全局模块无法更新的问题。关于 <code>nvm</code> 和 <code>n</code> 详细区别可以参考<a href="http://taobaofed.org/blog/2015/11/17/nvm-or-n/" target="_blank" rel="external">淘宝前端团队(FED)</a>博客。</p>
+<p>### </p>
 
       
     </div>
@@ -402,6 +431,20 @@ but GitHub does not provide shell access.
         </div>
       
 
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/12/07/Hexo配置使用/" rel="prev" title="Hexo搭建GitHub博客（二）- Hexo配置使用">
+                Hexo搭建GitHub博客（二）- Hexo配置使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
       
 
       
@@ -466,7 +509,7 @@ but GitHub does not provide shell access.
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">1</span>
+              <span class="site-state-item-count">2</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -514,7 +557,7 @@ but GitHub does not provide shell access.
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#推荐理由"><span class="nav-number">1.1.</span> <span class="nav-text">推荐理由:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#需要了解的内容（能掌握更好）："><span class="nav-number">1.2.</span> <span class="nav-text">需要了解的内容（能掌握更好）：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装-Git-NodeJS-环境"><span class="nav-number">2.</span> <span class="nav-text">安装 Git + NodeJS 环境</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装-Git"><span class="nav-number">2.1.</span> <span class="nav-text">安装 Git</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#注册-GitHub"><span class="nav-number">2.2.</span> <span class="nav-text">注册 GitHub</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建仓库"><span class="nav-number">2.3.</span> <span class="nav-text">创建仓库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置-SSH"><span class="nav-number">2.4.</span> <span class="nav-text">配置 SSH</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#推荐理由"><span class="nav-number">1.1.</span> <span class="nav-text">推荐理由:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#需要了解的内容（能掌握更好）："><span class="nav-number">1.2.</span> <span class="nav-text">需要了解的内容（能掌握更好）：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装-Git"><span class="nav-number">2.</span> <span class="nav-text">安装 Git</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装-Git-客户端"><span class="nav-number">2.1.</span> <span class="nav-text">安装 Git 客户端</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#注册-GitHub"><span class="nav-number">2.2.</span> <span class="nav-text">注册 GitHub</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建仓库"><span class="nav-number">2.3.</span> <span class="nav-text">创建仓库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置-SSH"><span class="nav-number">2.4.</span> <span class="nav-text">配置 SSH</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#搭建-Node-js-开发环境"><span class="nav-number">3.</span> <span class="nav-text">搭建 Node.js 开发环境</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装-nvm"><span class="nav-number">3.1.</span> <span class="nav-text">安装 nvm</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装切换各版本-node-npm"><span class="nav-number">3.2.</span> <span class="nav-text">安装切换各版本 node/npm</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-nvmrc-文件配置项目所使用的-node-版本"><span class="nav-number">3.3.</span> <span class="nav-text">使用 .nvmrc 文件配置项目所使用的 node 版本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#nvm-与-n-的区别"><span class="nav-number">3.4.</span> <span class="nav-text">nvm 与 n 的区别</span></a></li></ol></li></ol></div>
             
           </div>
         </section>
