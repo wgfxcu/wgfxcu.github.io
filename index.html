@@ -239,6 +239,264 @@
             
               
                 
+                <a class="post-title-link" href="/2016/12/30/Linux服务器性能检测-内存篇/" itemprop="url">
+                  Linux服务器性能检测-内存篇
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-12-30T10:27:01+08:00" content="2016-12-30">
+              2016-12-30
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/12/30/Linux服务器性能检测-内存篇/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/12/30/Linux服务器性能检测-内存篇/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>事实上，当上述服务器系统资源中的任何一个遭遇瓶颈，都会带来服务器性能的下降，典型的症状就是系统运行迟缓。<br>本文从以下几个角度介绍Linux系统内存相关的排查。                           </p>
+<ol>
+<li>内存的使用率如何查看，使用率真的很高吗</li>
+<li>内存用在哪里了</li>
+<li>内存优化可以有哪些手段</li>
+</ol>
+<h3 id="内存硬件查看"><a href="#内存硬件查看" class="headerlink" title="内存硬件查看"></a>内存硬件查看</h3><p>在<code>Linux</code>系统环境下，可以使用dmidecode命令查看硬件设备的详细信息。<br>命令格式: dmidecode -t typecode<br>其中typecode是设备类型代码， 具体代码如下：           </p>
+<pre><code>0   BIOS                            
+1   System                      
+2   Base Board                      
+3   Chassis                 
+4   Processor                   
+5   Memory Controller                   
+6   Memory Module                   
+7   Cache                       
+8   Port Connector                          
+9   System Slots                        
+10   On Board Devices                   
+11   OEM Strings                            
+12   System Configuration Options                           
+13   BIOS Language                                      
+14   Group Associations                         
+15   System Event Log                               
+16   Physical Memory Array                      
+17   Memory Device                  
+18   32-bit Memory Error                    
+19   Memory Array Mapped Address                
+20   Memory Device Mapped Address               
+21   Built-in Pointing Device               
+22   Portable Battery                   
+23   System Reset                   
+24   Hardware Security              
+25   System Power Controls              
+26   Voltage Probe                                
+27   Cooling Device             
+28   Temperature Probe                  
+29   Electrical Current Probe                   
+30   Out-of-band Remote Access                  
+31   Boot Integrity Services                    
+32   System Boot                
+33   64-bit Memory Error                
+34   Management Device                  
+35   Management Device Component                             
+36   Management Device Threshold Data               
+37   Memory Channel             
+38   IPMI Device                
+39   Power Supply           
+</code></pre><p>例如：                     </p>
+<pre><code>使用dmidecode -t 1 可以查看主板信息(制造商、型号、序列号等等)                     
+使用dmidecode -t 4 可以查看CPU信息(CPU数据、型号、大小、频率等等)                                
+使用dmidecode -t 17 可以查看内存信息(插槽数目、内存类型、大小、频率等等)             
+</code></pre><img src="/2016/12/30/Linux服务器性能检测-内存篇/dmidecode-memory.png" alt="dmidecode" title="dmidecode">          
+<p>通过dmidecode工具可以查看很多硬件相关的数据，这里仅以内存为例。我们可以看到，服务器最大支持内存扩充为4GB，目前已经安装了4GB内存。         </p>
+<h3 id="内存的使用情况"><a href="#内存的使用情况" class="headerlink" title="内存的使用情况"></a>内存的使用情况</h3><p>使用free命令可以查看内存的使用情况。<br>-m以MB为单位显示整个系统的使用情况:       </p>
+<img src="/2016/12/30/Linux服务器性能检测-内存篇/free-m.png" alt="free-m" title="free-m">      
+<p>-h则自动选择以适合理解的容量单位显示:      </p>
+<img src="/2016/12/30/Linux服务器性能检测-内存篇/free-h.png" alt="free-h" title="free-h">        
+<p>可以看到系统内存4G(总可用3.9G)，当前医用3.8G，剩余103M。命令显示的”used”的值很高，接近total的值了，那么系统就真的没有内存空间了吗？<br>我们可以看到free命令下面有一行“-/+ buffers/cache”，该行显示的used是上一行“used”的值减去buffers和cached的值，同时该行的free是上一行的free加上buffers和cached的值。这里可以看到，尽管第一行的used显示共使用了3.8GB的物理内存，但除去buffers和cached数据后，实际仅仅占用了631M的内存，而如果剩余空间加上buffers和cached数据当前占用的内存，将达到3.2BG。<br>这是因为buffers和cache数据是动态变化的，内存充足时，内核出于性能考虑会进行一定的缓存，当内存空间不足时，buffers, cached占用的空间是可以为了程序释放的。<br>因此判断系统内存是否耗竭的实际指标是看减去buffer和cache的空间后used空间是否依旧很大，以及交换空间是否被大量占用。显然这个例子不符合内存耗竭的情形。        </p>
+<h3 id="查看消耗内存较多的内存"><a href="#查看消耗内存较多的内存" class="headerlink" title="查看消耗内存较多的内存"></a>查看消耗内存较多的内存</h3><p>top 命令用来查看具体进程消耗的内存空间       </p>
+<img src="/2016/12/30/Linux服务器性能检测-内存篇/top-up.png" alt="top-up" title="top-up">           
+<p>top 命令查看系统的实时负载，包括进程、CPU负载、内存使用等等；<br>进入top的实时界面后，默认按照CPU的使用率排序，通过”shift+m”将进程按照内存使用情况排序，可以查看哪些进程是当前系统的内存开销”大户”。<br>top 命令中，按下f键，进入选择排序的界面，可以选择要显示的信息列，要按照哪些信息列进行排序等，该界面上有简要的介绍。<br>另一方面，我们查看不同进程的内存开销:            </p>
+<img src="/2016/12/30/Linux服务器性能检测-内存篇/top-down.png" alt="top-down" title="top-down">       
+<p>通过%MEM列，可以查看哪几个进程占用了大量的内存，在缓解内存不足的紧急情况时，可以终止这些占用内存较多的进程。<br>top 命令中有一下与内存相关的数据列:<br>    （1）VIRT:虚拟内存，是进程身亲的虚拟内存总量。<br>    （2）RES: 常驻内存，是进程切实使用的物理内存量，free命令中看到的used列下面的值，就包括常驻内存的和，但不是虚拟内存的和。<br>    （3）SHR: 共享内存，比如共享占用的内存等。      </p>
+<h3 id="交换空间"><a href="#交换空间" class="headerlink" title="交换空间"></a>交换空间</h3><p>使用free 命令可以查看内存的总体使用，显示的内容也包括交换分区的大小，使用swapon、swapoff命令开启或关闭交换空间，交换空间是磁盘上的文件，并不是真正的内存空间。<br>当内存不足时，系统会选择通过: 1.将部分不常被访问的内存页交换到内存空间; 2.删除部分cache 的文件来释放内存空间。<br>系统的可用内存一般等于物理内存+交换分区。交换分区在磁盘上，因此速度比内存读写要慢的多。<br>交换分区实际上就是磁盘上的文件，可以通过mkswap 命令创建交换空间。      </p>
+<h3 id="内核态内存占用"><a href="#内核态内存占用" class="headerlink" title="内核态内存占用"></a>内核态内存占用</h3><p>slab系统用来处理系统中比较小的元数据，如文件描述符等，进而组织内核态的内存分配。<br>一个slab包含多个object,例如dentry这些数据结构就是object,可以通过slabtop命令查看系统中活动的object的数量与内存占用情况，从而了解哪些数据结构最占用内核态的内存空间。<br>例如: 使用slabtop 命令查看内核数据结构及内存占用               </p>
+<img src="/2016/12/30/Linux服务器性能检测-内存篇/slabtop.png" alt="slabtop" title="slabtop">       
+<p>关注点:            </p>
+<pre><code>1. 哪些数据结构的内存占用最大
+2. 哪些类型的数据结构对应的object最多，比如inode多代表文件系统被大量引用等。
+</code></pre><p>该交互命令支持的选项与排序标准有:<br>选项：                 </p>
+<pre><code>--delay=n, -d n    每隔n秒刷新信息                 
+--once, -o         只显示一次                    
+--sort=S, -s S     按照S排序，其中S为排序标准               
+
+排序标准(shift + 对应的键)：                 
+a：根据active objects数量高低排序            
+b：根据 objects / slab高低来排序                
+c：根据cache大小排序               
+l：根据slab数量排序                
+v：根据active slabs数量排序            
+n：按 name 排序             
+o：按照 objects 数量排序               
+p：按照 pages / slab 的值排序              
+s：按照 object 大小排序                
+u：按照 cache 使用量排序                
+</code></pre><h3 id="查看内存使用的动态变化"><a href="#查看内存使用的动态变化" class="headerlink" title="查看内存使用的动态变化"></a>查看内存使用的动态变化</h3><p>vmstat命令可以查看内存使用的动态变化      </p>
+<img src="/2016/12/30/Linux服务器性能检测-内存篇/vmstat.png" alt="vmstat" title="vmstat">     
+<p>每行会输出一些系统核心指标，这些指标可以让我们更详细的了解系统状态。后面跟的参数1，表示每秒输出一次统计信息，表头提示了每一列的含义，这几介绍一些和性能调优相关的列：                     </p>
+<pre><code>r：等待CPU资源的进程数。这个数据比平均负载更加能够体现CPU负载情况，数据中不包含等待IO的进程。如果这个数值大于机器CPU核数，那么机器的CPU资源已经饱和。                                                     
+free：系统可用内存数（以千字节为单位），如果剩余内存不足，也会导致系统性能问题。                
+si, so：交换区写入和读取的数量。如果这个数据不为0，说明系统已经在使用交换区（swap），机器物理内存已经不足。                                                        
+us, sy, id, wa, st：这些都代表了CPU时间的消耗，它们分别表示用户时间（user）、系统（内核）时间（sys）、空闲时间（idle）、IO等待时间（wait）和被偷走的时间（stolen，一般被其他虚拟机消耗）。                   
+</code></pre><h3 id="dstat"><a href="#dstat" class="headerlink" title="dstat"></a>dstat</h3><p>dstat命令是一个用来替换vmstat、iostat、netstat、nfsstat和ifstat这些命令的工具，是一个全能系统信息统计工具。与sysstat相比，dstat拥有一个彩色的界面，在手动观察性能状况时，数据比较显眼容易观察；而且dstat支持即时刷新，譬如输入<code>dstat 3</code>即每三秒收集一次，但最新的数据都会每秒刷新显示。和sysstat相同的是，dstat也可以收集指定的性能资源，譬如<code>dstat -c</code>即显示CPU的使用情况。        </p>
+<img src="/2016/12/30/Linux服务器性能检测-内存篇/dstat.png" alt="dstat" title="dstat">
+<h3 id="查看共享内存空间"><a href="#查看共享内存空间" class="headerlink" title="查看共享内存空间"></a>查看共享内存空间</h3><p>pmap 命令用于报告进程的内存映射关系，是Linux调试及运维一个很好的工具。<br>常用选项:                   </p>
+<pre><code>-x: 显示扩展格式                  
+-d: 显示设备格式                  
+-q: 不显示头尾行                  
+-V: 显示指定版本              
+</code></pre><p>参数:                 </p>
+<pre><code>进程号: 制定需要显示内存映射关系的进程号，可以是多个进程号              
+</code></pre><img src="/2016/12/30/Linux服务器性能检测-内存篇/pmap.png" alt="pmap" title="pmap">           
+<h3 id="查看系统内存历史记录"><a href="#查看系统内存历史记录" class="headerlink" title="查看系统内存历史记录"></a>查看系统内存历史记录</h3><p>sar(System Activity Reporter系统活动情况报告) 是目前Linux上最为全面的系统性能分析工具之一。可以从多方面对系统的活动进行报告，包括：文件的读写情况、系统调用的使用情况、磁盘I/O、CPU效率、内存使用状况、进程活动及IPC有关的活动等。<br>命令格式:           </p>
+<pre><code>sar [options] [-A] [-o file] t [n]    
+</code></pre><p>其中:             </p>
+<pre><code>t 为采样间隔，n为采样次数，默认值是1                
+-o file 表示将命令结果以二进制格式存放在文件中，file是文件名                
+options 为命令行选项，命令常用选项:              
+    -A: 所有报告的总和             
+    -u: 输出CPU使用情况的统计信息          
+    -v: 输出inode、文件和其他内核表的统计信息           
+    -d: 输出每一块设备的活动信息            
+    -r: 输出内存和交换空间的统计信息              
+    -b: 显示I/O和传送速率的统计信息             
+    -a: 文件读写情况                  
+    -c: 输出进程统计信息,每秒创建的进程数           
+    -R: 输出内存页面的统计信息             
+    -y: 终端设备活动情况                
+    -w: 输出系统交换活动信息          
+</code></pre><h3 id="如何清理内存使用"><a href="#如何清理内存使用" class="headerlink" title="如何清理内存使用"></a>如何清理内存使用</h3><ol>
+<li><p>释放占用的缓存空间                    </p>
+<p> # sync     //先将内存刷出，避免数据丢失<br> # echo 1 &gt; /proc/sys/vm/drop_caches //释放pagecache<br> # echo 2 &gt; /proc/sys/vm/drop_caches //释放dentry和inode<br> # echo 3 &gt; /proc/sys/vm/drop_caches //释放pagecache、dentry和inode                   </p>
+</li>
+<li><p>终止进程         </p>
+</li>
+</ol>
+<h3 id="与Linux内存相关的文件系统文件"><a href="#与Linux内存相关的文件系统文件" class="headerlink" title="与Linux内存相关的文件系统文件"></a>与Linux内存相关的文件系统文件</h3><p>内存信息: /proc/meminfo<br>进程状态信息: /proc/$pid/status<br>进程物理内存信息:  /proc/$pid/statm<br>slab的分布情况: /proc/slabinfo<br>虚拟内存信息: /proc/vmstat            </p>
+<h3 id="小福利"><a href="#小福利" class="headerlink" title="小福利"></a>小福利</h3><ol>
+<li><p>降低swap的使用率:          </p>
+<p> # sysctl -a | grep swappiness<br> vm.swappiness = 60                  </p>
+</li>
+<li><p>限制其他用户的内存使用:      </p>
+<p> # vim /etc/security/limits.conf<br> user1 hard as 1000 （用户user1所有累加起来，内存不超过1000kiB）<br> user1 soft as 800 （用户user1一次运行，内存不超过800kiB）         </p>
+</li>
+<li><p>大量连续内存数据:            </p>
+<p> # vim /etc/sysctl.conf<br> vm.nr_hugepage=20                   </p>
+</li>
+<li><p>调节page cache(大量一样的请求 调大page cache)               </p>
+<p> vm.lowmem_reserve_ratio = 256 256 32 （保留多少内存作为pagecache 当前 最大 最小）<br> vm.vfs_cache_pressure=100 （大于100，回收pagecache）<br> vm.page.cluster=3（一次性从swap写入内存的量为2的3次方页）<br> vm.zone_reclaim_mode=0/1（当内存危机时，是否尽量回收内存 0:尽量回收 1:尽量不回收）<br> min_free_kbytes：该文件表示强制Linux VM最低保留多少空闲内存（Kbytes）。                  </p>
+</li>
+<li><p>脏页               </p>
+<p> vm.dirty_background_radio=10 （当脏页占内存10%，pdflush工作）<br> vm.dirty_radio=40 （当进程自身脏页占内存40%，进程自己处理脏页，将其写入磁盘）<br> vm.dirty_expire_centisecs=3000 （脏页老化时间为30秒 3000/100=30秒）<br> vm.dirty_writeback_centisecs=500 （每隔5秒，pdflush监控一次内存数量 500/100=5秒）              </p>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/12/07/NexT主题配置使用/" itemprop="url">
                   Hexo搭建GitHub博客（三）- NexT主题配置使用
                 </a>
@@ -540,15 +798,15 @@ comments: false   #去除多说评论框
 <h4 id="source"><a href="#source" class="headerlink" title="source"></a>source</h4><p>资源文件夹是存放用户资源的地方。除 <code><em>posts</em></code> 文件夹之外，开头命名为 <code></code> (下划线)的文件 <code>/</code>  文件夹和隐藏的文件将会被忽略。Markdown 和 HTML 文件会被解析并放到 <code>public</code> 文件夹，而其他文件会被拷贝过去。</p>
 <h4 id="themes"><a href="#themes" class="headerlink" title="themes"></a>themes</h4><p>主题文件夹。Hexo 会根据主题来生成静态页面。</p>
 <h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><p>您可以在 <code>_config.yml</code> 中修改大部份的配置。</p>
-<h4 id="网站"><a href="#网站" class="headerlink" title="网站"></a>网站</h4><img src="/2016/12/07/Hexo配置使用/hexo-website.png" alt="网站" title="网站"> 
-<h4 id="网址"><a href="#网址" class="headerlink" title="网址"></a>网址</h4><img src="/2016/12/07/Hexo配置使用/hexo-weburl.png" alt="网址" title="网址"> 
+<h4 id="网站"><a href="#网站" class="headerlink" title="网站"></a>网站</h4><img src="/2016/12/07/Hexo配置使用/hexo-website.png" alt="网站" title="网站">
+<h4 id="网址"><a href="#网址" class="headerlink" title="网址"></a>网址</h4><img src="/2016/12/07/Hexo配置使用/hexo-weburl.png" alt="网址" title="网址">
 <blockquote>
 <p>网站存放在子目录   </p>
 <p>如果您的网站存放在子目录中，例如 <code><a href="http://yoursite.com/blog">http://yoursite.com/blog</a></code>，则请将您的 <code>url</code> 设为 <code><a href="http://yoursite.com/blog">http://yoursite.com/blog</a></code> 并把 <code>root</code> 设为 <code>/blog/</code>。</p>
 </blockquote>
-<h4 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h4><img src="/2016/12/07/Hexo配置使用/hexo-webdir.png" alt="目录" title="目录"> 
-<h4 id="文章"><a href="#文章" class="headerlink" title="文章"></a>文章</h4><img src="/2016/12/07/Hexo配置使用/hexo-webarticle.png" alt="文章" title="文章"> 
-<h4 id="分类-amp-标签"><a href="#分类-amp-标签" class="headerlink" title="分类 &amp; 标签"></a>分类 &amp; 标签</h4><img src="/2016/12/07/Hexo配置使用/hexo-webtag.png" alt="分类&标签" title="分类&标签"> 
+<h4 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h4><img src="/2016/12/07/Hexo配置使用/hexo-webdir.png" alt="目录" title="目录">
+<h4 id="文章"><a href="#文章" class="headerlink" title="文章"></a>文章</h4><img src="/2016/12/07/Hexo配置使用/hexo-webarticle.png" alt="文章" title="文章">
+<h4 id="分类-amp-标签"><a href="#分类-amp-标签" class="headerlink" title="分类 &amp; 标签"></a>分类 &amp; 标签</h4><img src="/2016/12/07/Hexo配置使用/hexo-webtag.png" alt="分类&标签" title="分类&标签">
 <h4 id="日期-时间格式"><a href="#日期-时间格式" class="headerlink" title="日期 / 时间格式"></a>日期 / 时间格式</h4><p>Hexo 使用 Moment.js 来解析和显示时间。</p>
 <img src="/2016/12/07/Hexo配置使用/hexo-webdata.png" alt="日期" title="日期">      
 <h4 id="分页"><a href="#分页" class="headerlink" title="分页"></a>分页</h4><img src="/2016/12/07/Hexo配置使用/hexo-webpaging.png" alt="分页" title="分页">      
@@ -610,7 +868,7 @@ comments: false   #去除多说评论框
 </blockquote>
 <h4 id="运行hexo-deploy命令"><a href="#运行hexo-deploy命令" class="headerlink" title="运行hexo deploy命令"></a>运行hexo deploy命令</h4><p>运行以下命令                </p>
 <pre><code>$ hexo deploy                
-</code></pre><p>过程中会提示输入你的github账号和密码，等待命令运行完成即可。部署完成后，在浏览器中访问<a href="https://wgfxcu.github.io能够看到你在本地调试好的博客，表示部署成功！" target="_blank" rel="external">https://wgfxcu.github.io能够看到你在本地调试好的博客，表示部署成功！</a></p>
+</code></pre><p>过程中会提示输入你的github账号和密码，等待命令运行完成即可。部署完成后，在浏览器中访问<a href="https://wgfxcu.github.io" target="_blank" rel="external">wgfxcu.github.io</a>能够看到你在本地调试好的博客，表示部署成功！</p>
 <h4 id="部署步骤总结"><a href="#部署步骤总结" class="headerlink" title="部署步骤总结"></a>部署步骤总结</h4><p>至此，部署到GitHub的工作已经完成，之后如果我们希望对自己的博客进行修改或者需要发布新的文章时，可以按以下三步进行。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ hexo clean # 删除已经生成的静态页面					</div><div class="line">$ hexo generate								</div><div class="line">$ hexo deploy</div></pre></td></tr></table></figure></p>
 
           
@@ -884,7 +1142,7 @@ node -v #查看 node 是否切换为对应版本
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">3</span>
+              <span class="site-state-item-count">4</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -892,7 +1150,7 @@ node -v #查看 node 是否切换为对应版本
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-count">2</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -901,7 +1159,7 @@ node -v #查看 node 是否切换为对应版本
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-count">3</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
