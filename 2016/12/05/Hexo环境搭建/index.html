@@ -80,7 +80,7 @@
 <meta property="og:image" content="http://yoursite.com/2016/12/05/Hexo环境搭建/github-sshkeys.png">
 <meta property="og:image" content="http://yoursite.com/2016/12/05/Hexo环境搭建/githug-addsshkeys.png">
 <meta property="og:image" content="http://yoursite.com/2016/12/05/Hexo环境搭建/nvm-node.png">
-<meta property="og:updated_time" content="2016-12-07T05:44:42.252Z">
+<meta property="og:updated_time" content="2016-12-30T12:13:30.026Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Hexo搭建GitHub博客（一）- 环境搭建">
 <meta name="twitter:description" content="前言之前无意中发现conglang的github博客，简洁干净，符合我的style。后来发现他使用HEXO+GitHub+Next主题搭建的。按耐不住就索性自己也来一个。同时也记录一下自己的实现过程，做个备案。
@@ -342,7 +342,7 @@
 <h2 id="安装-Git"><a href="#安装-Git" class="headerlink" title="安装 Git"></a>安装 Git</h2><h3 id="安装-Git-客户端"><a href="#安装-Git-客户端" class="headerlink" title="安装 Git 客户端"></a>安装 Git 客户端</h3><ol>
 <li>安装 Git 客户端 <a href="http://git-scm.com/downloads" target="_blank" rel="external">下载地址</a><img src="/2016/12/05/Hexo环境搭建/github-download.png" alt="Git客户端安装" title="Git客户端安装">      </li>
 <li>安装Git客户端：Windows用户直接Next就可以了。Mac和Linxu系统的用户可通过命令方式安装，这里不详细介绍了。        </li>
-<li>附上廖雪峰的Git经典入门教程: <a href="http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000" target="_blank" rel="external">Git入门教程</a> </li>
+<li>附上廖雪峰的Git经典入门教程: <a href="http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000" target="_blank" rel="external">Git入门教程</a></li>
 </ol>
 <h3 id="注册-GitHub"><a href="#注册-GitHub" class="headerlink" title="注册 GitHub"></a>注册 GitHub</h3><blockquote>
 <p>老手和已注册过的用户略    </p>
@@ -362,7 +362,7 @@
 <p>老手和已注册过的用户略   </p>
 </blockquote>
 <ol>
-<li>打开Git Bash终端：在桌面右键，会出现”Git Bash here”的选项，点击即可。 </li>
+<li>打开Git Bash终端：在桌面右键，会出现”Git Bash here”的选项，点击即可。</li>
 <li><p>设置user name和email：     </p>
 <pre><code>$ git config --global user.name &quot;你的GitHub用户名&quot;          
 $ git config --global user.email &quot;你的GitHub注册邮箱&quot;         
@@ -385,7 +385,7 @@ $ git config --global user.email &quot;你的GitHub注册邮箱&quot;
 RSA key fingerprint is 17:24:ac:a5:76:28:24:36:62:1b:36:4d:eb:df:a6:45.      
 Are you sure you want to continue connecting (yeso)?
 </code></pre><p> 输入yes后回车。<br> 然后显示如下信息则OK(其中的SeayXu是用户名)。         </p>
-<pre><code>Hi wgfxcu! You&apos;ve successfully authenticated, 
+<pre><code>Hi wgfxcu! You&apos;ve successfully authenticated,
 but GitHub does not provide shell access.
 </code></pre></li>
 </ol>
@@ -416,7 +416,7 @@ node -v #查看 node 是否切换为对应版本
 </code></pre><h3 id="nvm-与-n-的区别"><a href="#nvm-与-n-的区别" class="headerlink" title="nvm 与 n 的区别"></a>nvm 与 n 的区别</h3><p>node 版本管理工具还有一个是 <em><a href="https://github.com/tj/n" target="_blank" rel="external">TJ 大神的 n</a></em> 命令，n 命令是作为一个 node 的模块而存在，而 nvm 是一个独立于 node/npm 的外部 shell 脚本，因此 n 命令相比 nvm 更加局限。</p>
 <p>由于 npm 安装的模块路径均为 <code>/usr/local/lib/node_modules</code> ，当使用 n 切换不同的 node 版本时，实际上会共用全局的 node/npm 目录。 因此不能很好的满足『按不同 node 版本使用不同全局 node 模块』的需求。</p>
 <p>因此建议各位尽早开始使用 nvm ，以免出现全局模块无法更新的问题。关于 <code>nvm</code> 和 <code>n</code> 详细区别可以参考<a href="http://taobaofed.org/blog/2015/11/17/nvm-or-n/" target="_blank" rel="external">淘宝前端团队(FED)</a>博客。</p>
-<p>### </p>
+<p>###</p>
 
       
     </div>

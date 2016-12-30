@@ -308,100 +308,17 @@
       
         
           
-            <h2 id="查看系统负载"><a href="#查看系统负载" class="headerlink" title="查看系统负载"></a>查看系统负载</h2><p>查看系统负载的工具: uptime、w 等。系统平均负载时<strong>处于运行</strong>或<strong>不可打扰状态</strong>的进程的平均数     </p>
-<pre><code>* 可运行: 运行态，占用CPU，或就绪态，等待CPU调度           
+          查看系统负载查看系统负载的工具: uptime、w 等。系统平均负载时处于运行或不可打扰状态的进程的平均数     
+* 可运行: 运行态，占用CPU，或就绪态，等待CPU调度           
 * 不可打扰: 阻塞，正在等待I/O          
-</code></pre><p>例1. 使用uptime查看系统负载              </p>
-<pre><code># uptime                
-19:26:17 up 49 days,  7:34,  1 user,  load average: 0.67, 0.51, 0.41            
-</code></pre><p>这里我们关注的是最后三列，即系统1分钟、5分钟、15分钟内的平均负载，判断一个系统负载是否偏高需要计算单核CPU的平均负载，等于这里uptime命令显示的系统平均负载 / CPU核数，一般以0.7为比较合适的值。偏高说明有比较多的进程在等待使用CPU资源。                </p>
-<p>例2. 使用w查看系统负载       </p>
-<pre><code># w                 
-  19:29:47 up 49 days,  7:38,  1 user,  load average: 0.42, 0.46, 0.41             
-  USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT           
-  openstac pts/1    10.14.16.25      19:21    1.00s  0.19s  0.03s sshd: openstack [priv]     
-</code></pre><p>使用 w 命令也可以查看类似的信息，w 命令还提供了当前登录用户，以及正在执行的操作等信息。<br>系统负载可以是CPU密集型的，也可以是RAM密集型和I/O密集型的，CPU密集型的系统比I/O密集型的系统响应度更好，因为I/O密集型的系统的磁盘I/O可能完全饱和，导致登录就很费事。        </p>
-<h3 id="top-命令"><a href="#top-命令" class="headerlink" title="top 命令"></a>top 命令</h3><p>top命令不仅可以查看当前系统的平均负载，还可以查看不同进程对于CPU、内存等资源的使用情况，在内存排障部分我们也将介绍top命令。<br>例3.使用top命令查看CPU使用率              </p>
-<pre><code>{% asset_img top.png top %}        
-</code></pre><p> 默认情况下，top命令是以CPU使用率由高到低排序显示进程信息的，在 top 信息界面按 K 键，并输入想要终止的PID，就可以直接杀死指定进程。              </p>
-<blockquote>
-<p>top的 -b 选项开启批处理模式，将每次刷新全部打印到stdout<br>top的 -n 选项指定退出top命令前刷新多少次信息。<br>top命令的输出：<br>    第1行：与uptime相同；<br>    第3行：当前的CPU运行情况：<br>        us：非nice用户进程占用CPU的比率<br>        sy：内核、内核进程占用CPU的比率；<br>        ni：如果一些用户进程修改过优先级，这里显示这些进程占用CPU时间的比率；<br>        id：CPU空闲比率，如果系统缓慢而这个值很高，说明系统慢的原因不是CPU负载高；<br>        wa：CPU等待执行I/O操作的时间比率，该指标可以用来排查磁盘I/O的问题，通常结合wa和id判断<br>        hi：CPU处理硬件终端所占时间的比率；<br>        si：CPU处理软件终端所占时间的比率；<br>        st：流逝的时间，虚拟机中的其他任务所占CPU时间的比率；<br>　　用户进程占比高，wa低，说明系统缓慢的原因在于进程占用大量CPU，通常还会伴有教低的id，说明CPU空转时间很少；<br>　　wa低，id高，可以排除CPU资源瓶颈的可能。　                                　<br>　　wa高，说明I/O占用了大量的CPU时间，需要检查交换空间的使用，交换空间位于磁盘上，性能远低于内存，当内存耗尽开始使用交换空间时，将会给性能带来严重影响，所以对于性能要求较高的服务器，一般建议关闭交换空间。另一方面，如果内存充足，但wa很高，说明需要检查哪个进程占用了大量的I/O资源。                                         </p>
-</blockquote>
-<h3 id="iostat-命令"><a href="#iostat-命令" class="headerlink" title="iostat 命令"></a>iostat 命令</h3><p>iostat 命令可以查看系统分区的IO使用情况<br>例4.iostat命令查看IO占用       </p>
-<pre><code>1 wgfxcu@Ubos:~$ iostat
-2 Linux 3.13.0-24-generic (Ubos)     2016年12月30日     _x86_64_    (1 CPU)           
-3
-4 avg-cpu:  %user   %nice %system %iowait  %steal   %idle             
-5       0.22    0.01    0.55    0.04    0.00   99.17             
+例1. 使用uptime查看系统负载   
+          ...
 
-6 Device:            tps    kB_read/s    kB_wrtn/s    kB_read    kB_wrtn          
-7 scd0              0.00         0.00         0.00         48          0          
-8 sda               0.32         2.67         4.12     765668    1182218          
-9 dm-0              0.54         2.66         4.12     762573    1182212      
-10 dm-1              0.00         0.00         0.00        896          0      
-</code></pre><p>在第2行系统发行版本下面的第4、5行，可以看到与top命令中CPU使用情况类似的信息，<br>第7行，可以看到一些IO指标：         </p>
-<pre><code>tps: 每秒I/O传输请求量；                
-kB_read/s：每秒读取多少KB；             
-kB_wrtn/s：每秒写多少KB；          
-kB_read：一共读了多少KB；       
-kB_wrtn：一共写了多少KB。           
-</code></pre><p>iostat命令属于sysstat工具包，由于我们的机器只挂载了一块硬盘，因此不能体现不同设备的I/O区别。</p>
-<h3 id="iotop-命令"><a href="#iotop-命令" class="headerlink" title="iotop 命令"></a>iotop 命令</h3><p>iotop命令类似于top命令，但是现实的是各个进程的I/O情况，对于定位I/O操作较重的进程有比较大的作用。<br>例5. iotop命令与进程的IO状况         </p>
-<img src="/2016/12/30/Linux服务器性能检测-CPU负载篇/iotop.png" alt="iotop" title="iotop">     
-<h2 id="sysstat工具与负载历史回放"><a href="#sysstat工具与负载历史回放" class="headerlink" title="sysstat工具与负载历史回放"></a>sysstat工具与负载历史回放</h2><p>很多系统负载过高的时候我们是无法立即获知或者立即解决的，当检测到或者知道历史的高负载状况时，可能需要回放历史监控数据，这时 sar 命令就派上用场了，sar命令同样来自sysstat工具包，可以记录系统的CPU负载、I/O状况和内存使用记录，便于历史数据的回放。<br>Ubuntu系统上，sysstat的配置文件在/etc/default/sysstat，sysstat默认关闭，通过将该文件中的ENABLED改为”true”启用；历史日志的存放位置为/var/log/sysstat<br>Red Hat系统上，sysstat的配置文件在/etc/sysconfig/sysstat文件，历史日志的存放位置为/var/log/sa<br>两种系统上，统计信息都是每10分钟记录一次，每天的23:59会分割统计文件，这些操作的频率都在/etc/cron.d/sysstat文件配置。                      </p>
-<h3 id="sar命令查看CPU、内存和磁盘记录"><a href="#sar命令查看CPU、内存和磁盘记录" class="headerlink" title="sar命令查看CPU、内存和磁盘记录"></a>sar命令查看CPU、内存和磁盘记录</h3><p>默认情况下，sar命令显示当天的统计信息，不带参数显示CPU统计信息，参数-r显示收集的内存记录，-b显示磁盘I/O<br>例6. 使用sar命令查看CPU使用                  </p>
-<pre><code># sar
-Linux 3.13.0-55-generic (ISeR-Server1)     08/12/2015     _x86_64_    (4 CPU)
-
-12:00:01 AM     CPU     %user     %nice   %system   %iowait    %steal     %idle                 
-12:05:01 AM     all      3.83      0.02      4.24      0.61      0.00     91.30             
-12:15:01 AM     all      3.57      0.02      4.28      0.58      0.00     91.54             
-12:25:01 AM     all      3.83      0.02      5.16      0.60      0.00     90.39             
-12:35:01 AM     all      3.98      0.02      5.66      0.58      0.00     89.76                 
-12:45:01 AM     all      3.86      0.02      5.26      0.59      0.00     90.28             
-12:55:01 AM     all      3.77      0.02      5.19      0.60      0.00     90.42                          
-</code></pre><p>例7. 使用sar命令查看当天内存使用         </p>
-<pre><code># sar -r
-Linux 3.13.0-55-generic (ISeR-Server1)     08/12/2015     _x86_64_    (4 CPU)
-
-12:00:01 AM kbmemfree kbmemused  %memused kbbuffers  kbcached  kbcommit   %commit  kbactive   kbinact   kbdirty
-12:05:01 AM   6420736   5839392     47.63    242640   1366912   6811944     55.56   4324000   1202152        24
-12:15:01 AM   6423128   5837000     47.61    242640   1367348   6830944     55.72   4320608   1202400        48
-12:25:01 AM   6430984   5829144     47.55    242640   1367548   6814980     55.59   4314376   1202468        48
-12:35:01 AM   6422924   5837204     47.61    242640   1367848   6817224     55.60   4321604   1202576        48
-12:45:01 AM   6427300   5832828     47.58    242640   1368056   6822240     55.65   4318412   1202572        28         
-</code></pre><p>例8. 使用sar命令查看当天IO统计记录           </p>
-<pre><code># sar -b
-Linux 3.13.0-55-generic (ISeR-Server1)     08/12/2015     _x86_64_    (4 CPU)
-
-12:00:01 AM       tps      rtps      wtps   bread/s   bwrtn/s
-12:05:01 AM      7.44      0.00      7.44      0.00    279.22
-12:15:01 AM      6.45      0.00      6.45      0.00    255.84
-12:25:01 AM      6.59      0.00      6.59      0.00    260.20
-12:35:01 AM      6.51      0.00      6.51      0.00    261.42
-12:45:01 AM      6.42      0.00      6.42      0.00    255.79       
-</code></pre><h3 id="使用sar查看指定时间、制定日期的历史记录"><a href="#使用sar查看指定时间、制定日期的历史记录" class="headerlink" title="使用sar查看指定时间、制定日期的历史记录"></a>使用sar查看指定时间、制定日期的历史记录</h3><p>例9. 使用参数-s和-e先定查看的时间                  </p>
-<pre><code># sar -s 20:00:00
-Linux 3.13.0-55-generic (ISeR-Server1)     08/12/2015     _x86_64_    (4 CPU)
-
-08:05:01 PM     CPU     %user     %nice   %system   %iowait    %steal     %idle
-08:15:01 PM     all      3.98      0.02      6.07      0.58      0.00     89.34
-08:25:01 PM     all      4.32      0.02      5.74      0.58      0.00     89.34
-Average:        all      4.15      0.02      5.91      0.58      0.00     89.34
-</code></pre><p>例10. 使用参数-f查看本月内之前某一天的历史统计信息        </p>
-<pre><code># sar -f /var/log/sysstat/sa08
-Linux 3.13.0-55-generic (ISeR-Server1)     08/08/2015     _x86_64_    (4 CPU)
-
-12:00:01 AM     CPU     %user     %nice   %system   %iowait    %steal     %idle
-12:05:01 AM     all      3.65      0.02      2.79      0.60      0.00     92.94
-12:15:01 AM     all      3.45      0.02      3.03      0.56      0.00     92.94
-12:25:01 AM     all      3.43      0.02      3.25      0.56      0.00     92.74
-12:35:01 AM     all      3.44      0.01      3.09      0.56      0.00     92.89
-12:45:01 AM     all      3.25      0.02      1.35      0.55      0.00     94.83
-12:55:01 AM     all      3.36      0.02      1.77      0.56      0.00     94.29
-</code></pre><p>sysstat工具只存储1个月内的系统使用记录，每天的记录以saN为文件名保存在相应的日志目录中，这里我们查看本月8号的CPU使用记录。</p>
-
-          
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/12/30/Linux服务器性能检测-CPU负载篇/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
         
       
     </div>
@@ -514,152 +431,20 @@ Linux 3.13.0-55-generic (ISeR-Server1)     08/08/2015     _x86_64_    (4 CPU)
       
         
           
-            <p>事实上，当上述服务器系统资源中的任何一个遭遇瓶颈，都会带来服务器性能的下降，典型的症状就是系统运行迟缓。<br>本文从以下几个角度介绍Linux系统内存相关的排查。                           </p>
-<ol>
-<li>内存的使用率如何查看，使用率真的很高吗</li>
-<li>内存用在哪里了</li>
-<li>内存优化可以有哪些手段</li>
-</ol>
-<h3 id="内存硬件查看"><a href="#内存硬件查看" class="headerlink" title="内存硬件查看"></a>内存硬件查看</h3><p>在<code>Linux</code>系统环境下，可以使用dmidecode命令查看硬件设备的详细信息。<br>命令格式: dmidecode -t typecode<br>其中typecode是设备类型代码， 具体代码如下：           </p>
-<pre><code>0   BIOS                            
-1   System                      
-2   Base Board                      
-3   Chassis                 
-4   Processor                   
-5   Memory Controller                   
-6   Memory Module                   
-7   Cache                       
-8   Port Connector                          
-9   System Slots                        
-10   On Board Devices                   
-11   OEM Strings                            
-12   System Configuration Options                           
-13   BIOS Language                                      
-14   Group Associations                         
-15   System Event Log                               
-16   Physical Memory Array                      
-17   Memory Device                  
-18   32-bit Memory Error                    
-19   Memory Array Mapped Address                
-20   Memory Device Mapped Address               
-21   Built-in Pointing Device               
-22   Portable Battery                   
-23   System Reset                   
-24   Hardware Security              
-25   System Power Controls              
-26   Voltage Probe                                
-27   Cooling Device             
-28   Temperature Probe                  
-29   Electrical Current Probe                   
-30   Out-of-band Remote Access                  
-31   Boot Integrity Services                    
-32   System Boot                
-33   64-bit Memory Error                
-34   Management Device                  
-35   Management Device Component                             
-36   Management Device Threshold Data               
-37   Memory Channel             
-38   IPMI Device                
-39   Power Supply           
-</code></pre><p>例如：                     </p>
-<pre><code>使用dmidecode -t 1 可以查看主板信息(制造商、型号、序列号等等)                     
-使用dmidecode -t 4 可以查看CPU信息(CPU数据、型号、大小、频率等等)                                
-使用dmidecode -t 17 可以查看内存信息(插槽数目、内存类型、大小、频率等等)             
-</code></pre><img src="/2016/12/30/Linux服务器性能检测-内存篇/dmidecode-memory.png" alt="dmidecode" title="dmidecode">          
-<p>通过dmidecode工具可以查看很多硬件相关的数据，这里仅以内存为例。我们可以看到，服务器最大支持内存扩充为4GB，目前已经安装了4GB内存。         </p>
-<h3 id="内存的使用情况"><a href="#内存的使用情况" class="headerlink" title="内存的使用情况"></a>内存的使用情况</h3><p>使用free命令可以查看内存的使用情况。<br>-m以MB为单位显示整个系统的使用情况:       </p>
-<img src="/2016/12/30/Linux服务器性能检测-内存篇/free-m.png" alt="free-m" title="free-m">      
-<p>-h则自动选择以适合理解的容量单位显示:      </p>
-<img src="/2016/12/30/Linux服务器性能检测-内存篇/free-h.png" alt="free-h" title="free-h">        
-<p>可以看到系统内存4G(总可用3.9G)，当前医用3.8G，剩余103M。命令显示的”used”的值很高，接近total的值了，那么系统就真的没有内存空间了吗？<br>我们可以看到free命令下面有一行“-/+ buffers/cache”，该行显示的used是上一行“used”的值减去buffers和cached的值，同时该行的free是上一行的free加上buffers和cached的值。这里可以看到，尽管第一行的used显示共使用了3.8GB的物理内存，但除去buffers和cached数据后，实际仅仅占用了631M的内存，而如果剩余空间加上buffers和cached数据当前占用的内存，将达到3.2BG。<br>这是因为buffers和cache数据是动态变化的，内存充足时，内核出于性能考虑会进行一定的缓存，当内存空间不足时，buffers, cached占用的空间是可以为了程序释放的。<br>因此判断系统内存是否耗竭的实际指标是看减去buffer和cache的空间后used空间是否依旧很大，以及交换空间是否被大量占用。显然这个例子不符合内存耗竭的情形。        </p>
-<h3 id="查看消耗内存较多的内存"><a href="#查看消耗内存较多的内存" class="headerlink" title="查看消耗内存较多的内存"></a>查看消耗内存较多的内存</h3><p>top 命令用来查看具体进程消耗的内存空间       </p>
-<img src="/2016/12/30/Linux服务器性能检测-内存篇/top-up.png" alt="top-up" title="top-up">           
-<p>top 命令查看系统的实时负载，包括进程、CPU负载、内存使用等等；<br>进入top的实时界面后，默认按照CPU的使用率排序，通过”shift+m”将进程按照内存使用情况排序，可以查看哪些进程是当前系统的内存开销”大户”。<br>top 命令中，按下f键，进入选择排序的界面，可以选择要显示的信息列，要按照哪些信息列进行排序等，该界面上有简要的介绍。<br>另一方面，我们查看不同进程的内存开销:            </p>
-<img src="/2016/12/30/Linux服务器性能检测-内存篇/top-down.png" alt="top-down" title="top-down">       
-<p>通过%MEM列，可以查看哪几个进程占用了大量的内存，在缓解内存不足的紧急情况时，可以终止这些占用内存较多的进程。<br>top 命令中有一下与内存相关的数据列:<br>    （1）VIRT:虚拟内存，是进程身亲的虚拟内存总量。<br>    （2）RES: 常驻内存，是进程切实使用的物理内存量，free命令中看到的used列下面的值，就包括常驻内存的和，但不是虚拟内存的和。<br>    （3）SHR: 共享内存，比如共享占用的内存等。      </p>
-<h3 id="交换空间"><a href="#交换空间" class="headerlink" title="交换空间"></a>交换空间</h3><p>使用free 命令可以查看内存的总体使用，显示的内容也包括交换分区的大小，使用swapon、swapoff命令开启或关闭交换空间，交换空间是磁盘上的文件，并不是真正的内存空间。<br>当内存不足时，系统会选择通过: 1.将部分不常被访问的内存页交换到内存空间; 2.删除部分cache 的文件来释放内存空间。<br>系统的可用内存一般等于物理内存+交换分区。交换分区在磁盘上，因此速度比内存读写要慢的多。<br>交换分区实际上就是磁盘上的文件，可以通过mkswap 命令创建交换空间。      </p>
-<h3 id="内核态内存占用"><a href="#内核态内存占用" class="headerlink" title="内核态内存占用"></a>内核态内存占用</h3><p>slab系统用来处理系统中比较小的元数据，如文件描述符等，进而组织内核态的内存分配。<br>一个slab包含多个object,例如dentry这些数据结构就是object,可以通过slabtop命令查看系统中活动的object的数量与内存占用情况，从而了解哪些数据结构最占用内核态的内存空间。<br>例如: 使用slabtop 命令查看内核数据结构及内存占用               </p>
-<img src="/2016/12/30/Linux服务器性能检测-内存篇/slabtop.png" alt="slabtop" title="slabtop">       
-<p>关注点:            </p>
-<pre><code>1. 哪些数据结构的内存占用最大
-2. 哪些类型的数据结构对应的object最多，比如inode多代表文件系统被大量引用等。
-</code></pre><p>该交互命令支持的选项与排序标准有:<br>选项：                 </p>
-<pre><code>--delay=n, -d n    每隔n秒刷新信息                 
---once, -o         只显示一次                    
---sort=S, -s S     按照S排序，其中S为排序标准               
+          事实上，当上述服务器系统资源中的任何一个遭遇瓶颈，都会带来服务器性能的下降，典型的症状就是系统运行迟缓。本文从以下几个角度介绍Linux系统内存相关的排查。                           
 
-排序标准(shift + 对应的键)：                 
-a：根据active objects数量高低排序            
-b：根据 objects / slab高低来排序                
-c：根据cache大小排序               
-l：根据slab数量排序                
-v：根据active slabs数量排序            
-n：按 name 排序             
-o：按照 objects 数量排序               
-p：按照 pages / slab 的值排序              
-s：按照 object 大小排序                
-u：按照 cache 使用量排序                
-</code></pre><h3 id="查看内存使用的动态变化"><a href="#查看内存使用的动态变化" class="headerlink" title="查看内存使用的动态变化"></a>查看内存使用的动态变化</h3><p>vmstat命令可以查看内存使用的动态变化      </p>
-<img src="/2016/12/30/Linux服务器性能检测-内存篇/vmstat.png" alt="vmstat" title="vmstat">     
-<p>每行会输出一些系统核心指标，这些指标可以让我们更详细的了解系统状态。后面跟的参数1，表示每秒输出一次统计信息，表头提示了每一列的含义，这几介绍一些和性能调优相关的列：                     </p>
-<pre><code>r：等待CPU资源的进程数。这个数据比平均负载更加能够体现CPU负载情况，数据中不包含等待IO的进程。如果这个数值大于机器CPU核数，那么机器的CPU资源已经饱和。                                                     
-free：系统可用内存数（以千字节为单位），如果剩余内存不足，也会导致系统性能问题。                
-si, so：交换区写入和读取的数量。如果这个数据不为0，说明系统已经在使用交换区（swap），机器物理内存已经不足。                                                        
-us, sy, id, wa, st：这些都代表了CPU时间的消耗，它们分别表示用户时间（user）、系统（内核）时间（sys）、空闲时间（idle）、IO等待时间（wait）和被偷走的时间（stolen，一般被其他虚拟机消耗）。                   
-</code></pre><h3 id="dstat"><a href="#dstat" class="headerlink" title="dstat"></a>dstat</h3><p>dstat命令是一个用来替换vmstat、iostat、netstat、nfsstat和ifstat这些命令的工具，是一个全能系统信息统计工具。与sysstat相比，dstat拥有一个彩色的界面，在手动观察性能状况时，数据比较显眼容易观察；而且dstat支持即时刷新，譬如输入<code>dstat 3</code>即每三秒收集一次，但最新的数据都会每秒刷新显示。和sysstat相同的是，dstat也可以收集指定的性能资源，譬如<code>dstat -c</code>即显示CPU的使用情况。        </p>
-<img src="/2016/12/30/Linux服务器性能检测-内存篇/dstat.png" alt="dstat" title="dstat">
-<h3 id="查看共享内存空间"><a href="#查看共享内存空间" class="headerlink" title="查看共享内存空间"></a>查看共享内存空间</h3><p>pmap 命令用于报告进程的内存映射关系，是Linux调试及运维一个很好的工具。<br>常用选项:                   </p>
-<pre><code>-x: 显示扩展格式                  
--d: 显示设备格式                  
--q: 不显示头尾行                  
--V: 显示指定版本              
-</code></pre><p>参数:                 </p>
-<pre><code>进程号: 制定需要显示内存映射关系的进程号，可以是多个进程号              
-</code></pre><img src="/2016/12/30/Linux服务器性能检测-内存篇/pmap.png" alt="pmap" title="pmap">           
-<h3 id="查看系统内存历史记录"><a href="#查看系统内存历史记录" class="headerlink" title="查看系统内存历史记录"></a>查看系统内存历史记录</h3><p>sar(System Activity Reporter系统活动情况报告) 是目前Linux上最为全面的系统性能分析工具之一。可以从多方面对系统的活动进行报告，包括：文件的读写情况、系统调用的使用情况、磁盘I/O、CPU效率、内存使用状况、进程活动及IPC有关的活动等。<br>命令格式:           </p>
-<pre><code>sar [options] [-A] [-o file] t [n]    
-</code></pre><p>其中:             </p>
-<pre><code>t 为采样间隔，n为采样次数，默认值是1                
--o file 表示将命令结果以二进制格式存放在文件中，file是文件名                
-options 为命令行选项，命令常用选项:              
-    -A: 所有报告的总和             
-    -u: 输出CPU使用情况的统计信息          
-    -v: 输出inode、文件和其他内核表的统计信息           
-    -d: 输出每一块设备的活动信息            
-    -r: 输出内存和交换空间的统计信息              
-    -b: 显示I/O和传送速率的统计信息             
-    -a: 文件读写情况                  
-    -c: 输出进程统计信息,每秒创建的进程数           
-    -R: 输出内存页面的统计信息             
-    -y: 终端设备活动情况                
-    -w: 输出系统交换活动信息          
-</code></pre><h3 id="如何清理内存使用"><a href="#如何清理内存使用" class="headerlink" title="如何清理内存使用"></a>如何清理内存使用</h3><ol>
-<li><p>释放占用的缓存空间                    </p>
-<p> # sync     //先将内存刷出，避免数据丢失<br> # echo 1 &gt; /proc/sys/vm/drop_caches //释放pagecache<br> # echo 2 &gt; /proc/sys/vm/drop_caches //释放dentry和inode<br> # echo 3 &gt; /proc/sys/vm/drop_caches //释放pagecache、dentry和inode                   </p>
-</li>
-<li><p>终止进程         </p>
-</li>
-</ol>
-<h3 id="与Linux内存相关的文件系统文件"><a href="#与Linux内存相关的文件系统文件" class="headerlink" title="与Linux内存相关的文件系统文件"></a>与Linux内存相关的文件系统文件</h3><p>内存信息: /proc/meminfo<br>进程状态信息: /proc/$pid/status<br>进程物理内存信息:  /proc/$pid/statm<br>slab的分布情况: /proc/slabinfo<br>虚拟内存信息: /proc/vmstat            </p>
-<h3 id="小福利"><a href="#小福利" class="headerlink" title="小福利"></a>小福利</h3><ol>
-<li><p>降低swap的使用率:          </p>
-<p> # sysctl -a | grep swappiness<br> vm.swappiness = 60                  </p>
-</li>
-<li><p>限制其他用户的内存使用:      </p>
-<p> # vim /etc/security/limits.conf<br> user1 hard as 1000 （用户user1所有累加起来，内存不超过1000kiB）<br> user1 soft as 800 （用户user1一次运行，内存不超过800kiB）         </p>
-</li>
-<li><p>大量连续内存数据:            </p>
-<p> # vim /etc/sysctl.conf<br> vm.nr_hugepage=20                   </p>
-</li>
-<li><p>调节page cache(大量一样的请求 调大page cache)               </p>
-<p> vm.lowmem_reserve_ratio = 256 256 32 （保留多少内存作为pagecache 当前 最大 最小）<br> vm.vfs_cache_pressure=100 （大于100，回收pagecache）<br> vm.page.cluster=3（一次性从swap写入内存的量为2的3次方页）<br> vm.zone_reclaim_mode=0/1（当内存危机时，是否尽量回收内存 0:尽量回收 1:尽量不回收）<br> min_free_kbytes：该文件表示强制Linux VM最低保留多少空闲内存（Kbytes）。                  </p>
-</li>
-<li><p>脏页               </p>
-<p> vm.dirty_background_radio=10 （当脏页占内存10%，pdflush工作）<br> vm.dirty_radio=40 （当进程自身脏页占内存40%，进程自己处理脏页，将其写入磁盘）<br> vm.dirty_expire_centisecs=3000 （脏页老化时间为30秒 3000/100=30秒）<br> vm.dirty_writeback_centisecs=500 （每隔5秒，pdflush监控一次内存数量 500/100=5秒）              </p>
-</li>
-</ol>
+内存的使用率如何查看，使用率真的很高吗
+内存用在哪里了
+内存优化可以有哪些手段
 
-          
+内存
+          ...
+
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/12/30/Linux服务器性能检测-内存篇/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
         
       
     </div>
@@ -772,112 +557,17 @@ options 为命令行选项，命令常用选项:
       
         
           
-            <p>NexT是一款简洁优雅且易于使用的主题，配置比较简单，只需要稍微修改配置文件即可，功能也比较全，分类、归档、标签显示明了，让人一看就知道干嘛的。</p>
-<p>NexT主题官方文档还算详细，但是有些部分的介绍不够详细，这里我做部分补充，并对自己做了修改的部分作介绍。</p>
-<blockquote>
-<p>在 Hexo 中有两份主要的配置文件，其名称都是 _config.yml。 其中，一份位于站点根目录下，主要包含 Hexo 本身的配置；另一份位于主题目录下，这份配置由主题作者提供，主要用于配置主题相关的选项。</p>
-<p>为了描述方便，在以下说明中，将前者称为 <code>站点配置文件</code>， 后者称为 <code>主题配置文件</code>。</p>
-</blockquote>
-<h2 id="安装-NexT"><a href="#安装-NexT" class="headerlink" title="安装 NexT"></a>安装 NexT</h2><p>Hexo 安装主题的方式非常简单，只需要将主题文件拷贝至站点目录的 themes 目录下， 然后修改下配置文件即可。具体到 NexT 来说，安装步骤如下。        </p>
-<h3 id="下载主题"><a href="#下载主题" class="headerlink" title="下载主题"></a>下载主题</h3><p>如果你熟悉 Git， 建议你使用 <code>克隆最新版本</code> 的方式，之后的更新可以通过 git pull 来快速更新， 而不用再次下载压缩包替换。<br>在终端窗口下，定位到 Hexo 站点目录下。使用 Git checkout 代码             </p>
-<pre><code>$ cd your-hexo-site                                                            
-$ git clone https://github.com/iissnan/hexo-theme-next themes/next               
-</code></pre><h3 id="启用主题"><a href="#启用主题" class="headerlink" title="启用主题"></a>启用主题</h3><p>与所有 Hexo 主题启用的模式一样。 当 克隆/下载 完成后，打开 <code>站点配置文件</code>， 找到 theme 字段，并将其值更改为 next。</p>
-<pre><code># Extensions                   
-## Plugins: https://hexo.io/plugins/        
-## Themes: https://hexo.io/themes/              
-theme: next              
-</code></pre><h3 id="验证主题"><a href="#验证主题" class="headerlink" title="验证主题"></a>验证主题</h3><p>首先启动 Hexo 本地站点，并开启调试模式（即加上 <code>–debug</code>），整个命令是 <code>hexo s –debug</code>。 在服务启动的过程，注意观察命令行输出是否有任何异常信息，如果你碰到问题，这些信息将帮助他人更好的定位错误。 当命令行输出中提示出：</p>
-<pre><code>INFO  Hexo is running at http://0.0.0.0:4000/. Press Ctrl+C to stop.        
-</code></pre><p>此时即可使用浏览器访问 <code><a href="http://localhost:4000" target="_blank" rel="external">http://localhost:4000</a></code>，检查站点是否正确运行。</p>
-<p>当你看到站点的外观与下图所示类似时即说明你已成功安装 NexT 主题。这是 NexT 默认的 Scheme —— Muse<br><img src="/2016/12/07/NexT主题配置使用/next-muse.png" alt="Muse Scheme" title="Muse Scheme"><br>现在，你已经成功安装并启用了 NexT 主题。下一步我们将要更改一些主题的设定，包括个性化以及集成第三方服务。                   </p>
-<h2 id="主题设定"><a href="#主题设定" class="headerlink" title="主题设定"></a>主题设定</h2><h3 id="选择-Scheme"><a href="#选择-Scheme" class="headerlink" title="选择 Scheme"></a>选择 Scheme</h3><p>Scheme 是 NexT 提供的一种特性，借助于 Scheme，NexT 为你提供多种不同的外观。同时，几乎所有的配置都可以 在 Scheme 之间共用。目前 NexT 支持三种 Scheme，他们是：</p>
-<ol>
-<li>Muse - 默认 Scheme，这是 NexT 最初的版本，黑白主调，大量留白</li>
-<li>Mist - Muse 的紧凑版本，整洁有序的单栏外观</li>
-<li>Pisces - 双栏 Scheme，小家碧玉似的清新      </li>
-</ol>
-<p>Scheme 的切换通过更改 <code>主题配置文件</code>，搜索 scheme 关键字。 你会看到有三行 scheme 的配置，将你需用启用的 scheme 前面注释 # 即可。      </p>
-<h3 id="设置-语言"><a href="#设置-语言" class="headerlink" title="设置 语言"></a>设置 语言</h3><p>编辑 站点配置文件， 将 language 设置成你所需要的语言。建议明确设置你所需要的语言，例如选用简体中文，配置如下：</p>
-<pre><code>language: zh-Hans        
-</code></pre><p>目前 NexT 支持的语言如以下表格所示：<br><img src="/2016/12/07/NexT主题配置使用/next-language.png" alt="语言" title="语言">                    </p>
-<h3 id="设置-菜单"><a href="#设置-菜单" class="headerlink" title="设置 菜单"></a>设置 菜单</h3><p>NexT主题菜单设置，用于设置博客上方导航栏，在 <code>主题配置文件</code> 中修改。</p>
-<pre><code>menu:
-  home: /                       #主页
-  categories: /categories    #分类页（需手动创建）
-  #about: /about        #关于页面（需手动创建）
-  archives: /archives        #归档页
-  tags: /tags            #标签页（需手动创建）
-  #commonweal: /404.html        #公益 404 （需手动创建）                
-</code></pre><p>只是在menu选项中设置还不能让标签页面、分类页面生效，需要我们手动创建                </p>
-<h4 id="标签页面"><a href="#标签页面" class="headerlink" title="标签页面"></a>标签页面</h4><p>1&gt;运行以下命令             </p>
-<pre><code>hexo new page &quot;tags&quot;            
-</code></pre><p>同时，在/source目录下会生成一个tags文件夹，里面包含一个index.md文件                           </p>
-<p>2&gt;修改/source/tags目录下的index.md文件                     </p>
-<pre><code>title: tags
-date: 2015-09-29 14:37:02
-type: &quot;tags&quot;
+          NexT是一款简洁优雅且易于使用的主题，配置比较简单，只需要稍微修改配置文件即可，功能也比较全，分类、归档、标签显示明了，让人一看就知道干嘛的。
+NexT主题官方文档还算详细，但是有些部分的介绍不够详细，这里我做部分补充，并对自己做了修改的部分作介绍。
 
----            
-</code></pre><p>3&gt;修改主题配置文件<br>去掉tags的注释                            </p>
-<pre><code>menu:
-  home: /                       #主页
-  categories: /categories    #分类页（需手动创建）
-  #about: /about        #关于页面（需手动创建）
-  archives: /archives        #归档页
-  tags: /tags            #标签页（需手动创建）
-  #commonweal: /404.html        #公益 404 （需手动创建）
-</code></pre><h4 id="分类页面"><a href="#分类页面" class="headerlink" title="分类页面"></a>分类页面</h4><p>1&gt;运行以下命令                     </p>
-<pre><code>hexo new page &quot;categories&quot;                        
-</code></pre><p>同时，在/source目录下会生成一个categories文件夹，里面包含一个index.md文件                             </p>
-<p>2&gt;修改/source/categories目录下的index.md文件                         </p>
-<pre><code>title: categories
-date: 2015-09-29 14:47:21
-type: &quot;categories&quot;
+在 Hexo 中有两份主要的配置文件，其名称
+          ...
 
----            
-</code></pre><p>3&gt;修改主题配置文件<br>去掉categories的注释                                  </p>
-<pre><code>menu:
-  home: /                       #主页
-  categories: /categories    #分类页（需手动创建）
-  #about: /about        #关于页面（需手动创建）
-  archives: /archives        #归档页
-  tags: /tags            #标签页（需手动创建）
-  #commonweal: /404.html        #公益 404 （需手动创建）                                 
-</code></pre><h3 id="设置侧栏"><a href="#设置侧栏" class="headerlink" title="设置侧栏"></a>设置侧栏</h3><p>默认情况下，侧栏仅在文章页面（拥有目录列表）时才显示，并放置于右侧位置。可以通过修改 主题配置文件 中的 sidebar 字段来控制侧栏的行为。侧栏的设置包括两个部分，其一是侧栏的位置， 其二是侧栏显示的时机。                                        </p>
-<ol>
-<li>设置侧栏的位置，修改 sidebar.position 的值                           </li>
-<li>设置侧栏显示的时机，修改 sidebar.display 的值                                            <img src="/2016/12/07/NexT主题配置使用/next-sidebar.png" alt="侧栏" title="侧栏">                              
-</li>
-</ol>
-<h3 id="侧边头像设置"><a href="#侧边头像设置" class="headerlink" title="侧边头像设置"></a>侧边头像设置</h3><p>在next主题文件夹中的 <code>source</code> 目录中，创建 <code>uploads</code> 目录，将你的头像avatar.png放入该目录下。编辑 <code>站点配置文件</code>，增加avatar字段                       </p>
-<pre><code># Avatar
-avatar: /uploads/avatar.png
-</code></pre><h3 id="设置作者昵称"><a href="#设置作者昵称" class="headerlink" title="设置作者昵称"></a>设置作者昵称</h3><p>编辑 <code>站点配置文件</code>， 设置 author 为你的昵称。                                          </p>
-<h3 id="站点描述"><a href="#站点描述" class="headerlink" title="站点描述"></a>站点描述</h3><p>编辑 <code>站点配置文件</code>， 设置 description 字段为你的站点描述。站点描述可以是你喜欢的一句签名:)                                </p>
-<h3 id="多说评论"><a href="#多说评论" class="headerlink" title="多说评论"></a>多说评论</h3><h4 id="多说站点"><a href="#多说站点" class="headerlink" title="多说站点"></a>多说站点</h4><p>使用多说前需要先在 多说 创建一个站点。具体步骤如下：                     </p>
-<ol>
-<li>登录后在首页选择 “我要安装”。                    </li>
-<li>创建站点，填写站点相关信息。 多说域名 这一栏填写的即是你的 duoshuo_shortname，如图：                         <img src="/2016/12/07/NexT主题配置使用/next-duoshuo.png" alt="多说" title="多说">                                 </li>
-<li>创建站点完成后在 <code>主题配置文件</code> 中duoshuo_shortname 字段的值设置成上一步中的值。                          </li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"># Duoshuo ShortName                                                                                                                                                                                   </div><div class="line">duoshuo_shortname: wgfxcu</div></pre></td></tr></table></figure>
-<p>至此，当你重新访问你的博客时，在每篇博文后面就会有多说的评论框。<br>但是，你会发现在分类页和标签页也会看到评论框，如果你感觉不爽可以通过下面的方法去掉。                                    </p>
-<h4 id="去除分类页标签页多说评论"><a href="#去除分类页标签页多说评论" class="headerlink" title="去除分类页标签页多说评论"></a>去除分类页标签页多说评论</h4><p>修改站点的/source/categories/目录下的 <code>index.md</code> 文件                                         </p>
-<pre><code>---
-title: categories
-date: 2016-12-06 15:58:52
-type: &quot;categories&quot;
-comments: false   #去除多说评论框
-
----
-</code></pre><p>同样修改站点的/source/tags/目录下的index.md文件即可去掉标签页的评论框.                                   </p>
-<h3 id="数据统计与分析"><a href="#数据统计与分析" class="headerlink" title="数据统计与分析"></a>数据统计与分析</h3><p>官方提供的 <a href="http://theme-next.iissnan.com/third-party-services.html#analytics-system" target="_blank" rel="external">数据统计与分析</a> 配置了一下，感觉影响主题的整体美观，所以放弃了。如果有需要可以参考官网文档设置一下。</p>
-<h3 id="内容分享服务"><a href="#内容分享服务" class="headerlink" title="内容分享服务"></a>内容分享服务</h3><p>官方提供的 <a href="http://theme-next.iissnan.com/third-party-services.html#share-system" target="_blank" rel="external">内容分享服务</a> 配置了一下，感觉影响主题的整体美观，所以放弃了。如果有需要可以参考官网文档设置一下。</p>
-<h3 id="搜索服务"><a href="#搜索服务" class="headerlink" title="搜索服务"></a>搜索服务</h3><p>官方提供的 <a href="http://theme-next.iissnan.com/third-party-services.html#search-system" target="_blank" rel="external">搜索服务</a> 有兴趣的可以折腾一下。</p>
-<p>至此，我们的博客就搭建完成了。O(∩_∩)O哈哈~</p>
-
-          
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/12/07/NexT主题配置使用/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
         
       
     </div>
@@ -990,94 +680,17 @@ comments: false   #去除多说评论框
       
         
           
-            <p>这篇博文主要介绍Hexo的配置安装和Hexo的常用命令，还有如何部署博客到GitHub。</p>
-<h3 id="Hexo-安装"><a href="#Hexo-安装" class="headerlink" title="Hexo 安装"></a>Hexo 安装</h3><p>打开Git命令行，执行如下命令        </p>
-<pre><code>$ npm install -g hexo                
-</code></pre><h3 id="初始化博客"><a href="#初始化博客" class="headerlink" title="初始化博客"></a>初始化博客</h3><p>安装 Hexo 完成后，请执行下列命令，Hexo 将会在指定文件夹中新建所需要的文件。   </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ hexo init blog</div><div class="line">$ cd blog</div><div class="line">$ npm install</div></pre></td></tr></table></figure>
-<p>新建完成后，指定文件夹的目录如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">.</div><div class="line">├── _config.yml</div><div class="line">├── package.json</div><div class="line">├── scaffolds</div><div class="line">├── source</div><div class="line">|   ├── _drafts</div><div class="line">|   └── _posts</div><div class="line">└── themes</div></pre></td></tr></table></figure>
-<h4 id="config-yml"><a href="#config-yml" class="headerlink" title="_config.yml"></a>_config.yml</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">网站的配置信息，您可以在此配置大部分的参数。</div></pre></td></tr></table></figure>
-<h4 id="package-json"><a href="#package-json" class="headerlink" title="package.json"></a>package.json</h4><p>应用程序的信息。EJS, Stylus 和 Markdown renderer 已默认安装，您可以自由移除。    </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">package.json</div><div class="line">&#123;</div><div class="line">	  &quot;name&quot;: &quot;hexo-site&quot;,</div><div class="line">	  &quot;version&quot;: &quot;0.0.0&quot;,</div><div class="line">	  &quot;private&quot;: true,</div><div class="line">	  &quot;hexo&quot;: &#123;</div><div class="line">  &quot;version&quot;: &quot;3.2.2&quot;</div><div class="line">	  &#125;,</div><div class="line">	  &quot;dependencies&quot;: &#123;</div><div class="line">    &quot;hexo&quot;: &quot;^3.2.0&quot;,</div><div class="line">	&quot;hexo-deployer-git&quot;: &quot;^0.2.0&quot;,</div><div class="line">	 	&quot;hexo-generator-archive&quot;: &quot;^0.1.4&quot;,</div><div class="line">	&quot;hexo-generator-category&quot;: &quot;^0.1.3&quot;,</div><div class="line">	&quot;hexo-generator-index&quot;: &quot;^0.2.0&quot;,</div><div class="line">	&quot;hexo-generator-searchdb&quot;: &quot;^1.0.3&quot;,</div><div class="line">	&quot;hexo-generator-tag&quot;: &quot;^0.2.0&quot;,</div><div class="line">	&quot;hexo-migrator-rss&quot;: &quot;^0.1.2&quot;,</div><div class="line">    &quot;hexo-renderer-ejs&quot;: &quot;^0.2.0&quot;,</div><div class="line">    &quot;hexo-renderer-marked&quot;: &quot;^0.2.10&quot;,</div><div class="line">    &quot;hexo-renderer-stylus&quot;: &quot;^0.3.1&quot;,</div><div class="line">    &quot;hexo-server&quot;: &quot;^0.2.0&quot;,</div><div class="line">    &quot;hexo-toc&quot;: &quot;^1.0.4&quot;</div><div class="line">		&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h4 id="scaffolds"><a href="#scaffolds" class="headerlink" title="scaffolds"></a>scaffolds</h4><p>模版文件夹。当您新建文章时，Hexo 会根据 scaffold 来建立文件。</p>
-<h4 id="source"><a href="#source" class="headerlink" title="source"></a>source</h4><p>资源文件夹是存放用户资源的地方。除 <code><em>posts</em></code> 文件夹之外，开头命名为 <code></code> (下划线)的文件 <code>/</code>  文件夹和隐藏的文件将会被忽略。Markdown 和 HTML 文件会被解析并放到 <code>public</code> 文件夹，而其他文件会被拷贝过去。</p>
-<h4 id="themes"><a href="#themes" class="headerlink" title="themes"></a>themes</h4><p>主题文件夹。Hexo 会根据主题来生成静态页面。</p>
-<h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><p>您可以在 <code>_config.yml</code> 中修改大部份的配置。</p>
-<h4 id="网站"><a href="#网站" class="headerlink" title="网站"></a>网站</h4><img src="/2016/12/07/Hexo配置使用/hexo-website.png" alt="网站" title="网站">
-<h4 id="网址"><a href="#网址" class="headerlink" title="网址"></a>网址</h4><img src="/2016/12/07/Hexo配置使用/hexo-weburl.png" alt="网址" title="网址">
-<blockquote>
-<p>网站存放在子目录   </p>
-<p>如果您的网站存放在子目录中，例如 <code><a href="http://yoursite.com/blog">http://yoursite.com/blog</a></code>，则请将您的 <code>url</code> 设为 <code><a href="http://yoursite.com/blog">http://yoursite.com/blog</a></code> 并把 <code>root</code> 设为 <code>/blog/</code>。</p>
-</blockquote>
-<h4 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h4><img src="/2016/12/07/Hexo配置使用/hexo-webdir.png" alt="目录" title="目录">
-<h4 id="文章"><a href="#文章" class="headerlink" title="文章"></a>文章</h4><img src="/2016/12/07/Hexo配置使用/hexo-webarticle.png" alt="文章" title="文章">
-<h4 id="分类-amp-标签"><a href="#分类-amp-标签" class="headerlink" title="分类 &amp; 标签"></a>分类 &amp; 标签</h4><img src="/2016/12/07/Hexo配置使用/hexo-webtag.png" alt="分类&标签" title="分类&标签">
-<h4 id="日期-时间格式"><a href="#日期-时间格式" class="headerlink" title="日期 / 时间格式"></a>日期 / 时间格式</h4><p>Hexo 使用 Moment.js 来解析和显示时间。</p>
-<img src="/2016/12/07/Hexo配置使用/hexo-webdata.png" alt="日期" title="日期">      
-<h4 id="分页"><a href="#分页" class="headerlink" title="分页"></a>分页</h4><img src="/2016/12/07/Hexo配置使用/hexo-webpaging.png" alt="分页" title="分页">      
-<h4 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h4><img src="/2016/12/07/Hexo配置使用/hexo-webextend.png" alt="扩展" title="扩展">   
-<h3 id="Hexo-指令"><a href="#Hexo-指令" class="headerlink" title="Hexo 指令"></a>Hexo 指令</h3><h4 id="init"><a href="#init" class="headerlink" title="init"></a>init</h4><pre><code>$ hexo init [folder]     
-</code></pre><p>新建一个网站。如果没有设置 <code>folder</code>，Hexo 默认在目前的文件夹建立网站。         </p>
-<h4 id="new"><a href="#new" class="headerlink" title="new"></a>new</h4><pre><code>$ hexo new [layout] &lt;title&gt;                    
-</code></pre><p>新建一篇文章。如果没有设置 <code>layout</code> 的话，默认使用 <code>_config.yml</code> 中的 <code>default_layout</code> 参数代替。如果标题包含空格的话，请使用引号括起来。                </p>
-<h4 id="generate"><a href="#generate" class="headerlink" title="generate"></a>generate</h4><pre><code>$ hexo generate                          
-</code></pre><p>生成静态文件。</p>
-<h4 id="publish"><a href="#publish" class="headerlink" title="publish"></a>publish</h4><pre><code>$ hexo publish [layout] &lt;filename&gt;                                       
-</code></pre><p>发表草稿。      </p>
-<h4 id="server"><a href="#server" class="headerlink" title="server"></a>server</h4><pre><code>$ hexo server                 
-</code></pre><p>启动服务器。默认情况下，访问网址为： <a href="http://localhost:4000/。" target="_blank" rel="external">http://localhost:4000/。</a></p>
-<h4 id="deploy"><a href="#deploy" class="headerlink" title="deploy"></a>deploy</h4><pre><code>$ hexo deploy                                 
-</code></pre><p>部署网站。</p>
-<h4 id="render"><a href="#render" class="headerlink" title="render"></a>render</h4><pre><code>$ hexo render &lt;file1&gt; [file2] ...        
-</code></pre><p>渲染文件。                        </p>
-<h4 id="migrate"><a href="#migrate" class="headerlink" title="migrate"></a>migrate</h4><pre><code>$ hexo migrate &lt;type&gt;                
-</code></pre><p>从其他博客系统迁移内容。            </p>
-<h4 id="clean"><a href="#clean" class="headerlink" title="clean"></a>clean</h4><pre><code>$ hexo clean        
-</code></pre><p>清除缓存文件 (db.json) 和已生成的静态文件 (public)。                </p>
-<h4 id="list"><a href="#list" class="headerlink" title="list"></a>list</h4><pre><code>$ hexo list &lt;type&gt;            
-</code></pre><p>列出网站资料。</p>
-<h4 id="version"><a href="#version" class="headerlink" title="version"></a>version</h4><pre><code>$ hexo version                
-</code></pre><p>显示 Hexo 版本。                    </p>
-<h4 id="选项"><a href="#选项" class="headerlink" title="选项"></a>选项</h4><h5 id="安全模式"><a href="#安全模式" class="headerlink" title="安全模式"></a>安全模式</h5><pre><code>$ hexo --safe                         
-</code></pre><p>在安全模式下，不会载入插件和脚本。当您在安装新插件遭遇问题时，可以尝试以安全模式重新执行。                        </p>
-<h5 id="调试模式"><a href="#调试模式" class="headerlink" title="调试模式"></a>调试模式</h5><pre><code>$ hexo --debug                            
-</code></pre><p>在终端中显示调试信息并记录到 debug.log。当您碰到问题时，可以尝试用调试模式重新执行一次，并 提交调试信息到 GitHub。            </p>
-<h5 id="简洁模式"><a href="#简洁模式" class="headerlink" title="简洁模式"></a>简洁模式</h5><pre><code>$ hexo --silent                            
-</code></pre><p>隐藏终端信息。                </p>
-<h5 id="自定义配置文件的路径"><a href="#自定义配置文件的路径" class="headerlink" title="自定义配置文件的路径"></a>自定义配置文件的路径</h5><pre><code>$ hexo --config custom.yml                        
-</code></pre><p>自定义配置文件的路径，执行后将不再使用 _config.yml。                </p>
-<h5 id="显示草稿"><a href="#显示草稿" class="headerlink" title="显示草稿"></a>显示草稿</h5><pre><code>$ hexo --draft                        
-</code></pre><p>显示 source/_drafts 文件夹中的草稿文章。                </p>
-<h5 id="自定义-CWD"><a href="#自定义-CWD" class="headerlink" title="自定义 CWD"></a>自定义 CWD</h5><pre><code>$ hexo --cwd /path/to/cwd            
-</code></pre><p>自定义当前工作目录（Current working directory）的路径。                        </p>
-<h4 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h4><h5 id="启动Server"><a href="#启动Server" class="headerlink" title="启动Server"></a>启动Server</h5><p>运行以下命令</p>
-<pre><code>$ hexo server                         
-</code></pre><p>Hexo server启动后，在浏览器中打开<a href="http://localhost:4000/" target="_blank" rel="external">http://localhost:4000/</a> 即可访问自己的博客，按Ctrl+C停止                </p>
-<h5 id="创建文章"><a href="#创建文章" class="headerlink" title="创建文章"></a>创建文章</h5><p>运行以下命令，可生成一篇文章，刷新<a href="http://localhost:4000/" target="_blank" rel="external">http://localhost:4000/</a> 即可看到新生成的文章。                    </p>
-<pre><code>$ hexo new &quot;hello-hexo&quot;                                
-</code></pre><p>同时在/blog/source/_posts目录下会生成一个”hello-hexo.md”的markdown文件，可以使用一个支持markdown语法的编辑器来编辑该文件，刷新<a href="http://localhost:4000/" target="_blank" rel="external">http://localhost:4000/</a> 即可看到修改后的结果。            </p>
-<p>打开这个文件                    </p>
-<img src="/2016/12/07/Hexo配置使用/hexo-webnew.png" alt="新建文件" title="新建文件">         
-<h5 id="生成静态网页"><a href="#生成静态网页" class="headerlink" title="生成静态网页"></a>生成静态网页</h5><p>运行以下命令，将markdown文件生成静态网页。                        </p>
-<pre><code>$ hexo generate                
-</code></pre><p>同时在/blog/目录下会生成一个public文件夹，里面是生成的静态文件。                   </p>
-<h3 id="部署到GitHub"><a href="#部署到GitHub" class="headerlink" title="部署到GitHub"></a>部署到GitHub</h3><p>至此我们已经可以在本地访问自己的博客了，但是只有本地能够看到，要部署到GitHub上面别人才能看到。我们可以在本地调试编辑好文章后再推送到GitHub上面。下面是部署到GitHub的过程。</p>
-<h4 id="创建github-page"><a href="#创建github-page" class="headerlink" title="创建github page"></a>创建github page</h4><p>在第一篇文章中我们已经在自己的github中创建了自己的github page。参考<a href="https://wgfxcu.github.io/2016/12/05/Hexo%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" target="_blank" rel="external">Hexo搭建GitHub博客（一）- 环境搭建</a>     </p>
-<h4 id="安装自动部署到GitHub的插件"><a href="#安装自动部署到GitHub的插件" class="headerlink" title="安装自动部署到GitHub的插件"></a>安装自动部署到GitHub的插件</h4><p>在初始化博客的时候运行的npm install命令默认并没有安装这个插件，所以要手动安装。<br>运行以下命令</p>
-<pre><code>$ npm install hexo-deployer-git              
-</code></pre><p>修改站点配置文件</p>
-<p>修改位于 <code>blog</code> 目录下的 <code>_config.yml</code> 文件<br>找到以下内容        </p>
-<img src="/2016/12/07/Hexo配置使用/hexo-github.png" alt="GitHub配置" title="GitHub配置">  
-<blockquote>
-<p>repository是自己github page的项目地址</p>
-</blockquote>
-<h4 id="运行hexo-deploy命令"><a href="#运行hexo-deploy命令" class="headerlink" title="运行hexo deploy命令"></a>运行hexo deploy命令</h4><p>运行以下命令                </p>
-<pre><code>$ hexo deploy                
-</code></pre><p>过程中会提示输入你的github账号和密码，等待命令运行完成即可。部署完成后，在浏览器中访问<a href="https://wgfxcu.github.io" target="_blank" rel="external">wgfxcu.github.io</a>能够看到你在本地调试好的博客，表示部署成功！</p>
-<h4 id="部署步骤总结"><a href="#部署步骤总结" class="headerlink" title="部署步骤总结"></a>部署步骤总结</h4><p>至此，部署到GitHub的工作已经完成，之后如果我们希望对自己的博客进行修改或者需要发布新的文章时，可以按以下三步进行。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ hexo clean # 删除已经生成的静态页面					</div><div class="line">$ hexo generate								</div><div class="line">$ hexo deploy</div></pre></td></tr></table></figure></p>
+          这篇博文主要介绍Hexo的配置安装和Hexo的常用命令，还有如何部署博客到GitHub。
+Hexo 安装打开Git命令行，执行如下命令        
+$ npm install -g hexo                
+初始化博客安装 Hexo 完成后，请执行下列命令，Hexo 将会在指定文
+          ...
 
-          
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/12/07/Hexo配置使用/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
         
       
     </div>
@@ -1190,101 +803,16 @@ comments: false   #去除多说评论框
       
         
           
-            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前无意中发现<a href="http://conglang.github.io/" target="_blank" rel="external">conglang</a>的github博客，简洁干净，符合我的style。后来发现他使用HEXO+GitHub+Next主题搭建的。按耐不住就索性自己也来一个。同时也记录一下自己的实现过程，做个备案。</p>
-<h3 id="推荐理由"><a href="#推荐理由" class="headerlink" title="推荐理由:"></a>推荐理由:</h3><ol>
-<li>免费：<a href="https://github.com/" target="_blank" rel="external">github</a>提供gh-pages服务是免费的，有300MB空间；    </li>
-<li>开源：由于github开源的原因，有很多人参与其中，自然技术支持很好。     </li>
-<li>便捷：博客完全托管在github上，基本上不需要花时间去管理，博客使用Markdown语法，上手很容易。      </li>
-</ol>
-<h3 id="需要了解的内容（能掌握更好）："><a href="#需要了解的内容（能掌握更好）：" class="headerlink" title="需要了解的内容（能掌握更好）："></a>需要了解的内容（能掌握更好）：</h3><ul>
-<li>html+css+javascript</li>
-<li>git基本语法</li>
-<li>markdown语法</li>
-<li>nodejs      </li>
-</ul>
-<blockquote>
-<p><strong>说明：</strong><br>本次搭建的环境是：Ubuntu14.04      </p>
-</blockquote>
-<h2 id="安装-Git"><a href="#安装-Git" class="headerlink" title="安装 Git"></a>安装 Git</h2><h3 id="安装-Git-客户端"><a href="#安装-Git-客户端" class="headerlink" title="安装 Git 客户端"></a>安装 Git 客户端</h3><ol>
-<li>安装 Git 客户端 <a href="http://git-scm.com/downloads" target="_blank" rel="external">下载地址</a><img src="/2016/12/05/Hexo环境搭建/github-download.png" alt="Git客户端安装" title="Git客户端安装">      </li>
-<li>安装Git客户端：Windows用户直接Next就可以了。Mac和Linxu系统的用户可通过命令方式安装，这里不详细介绍了。        </li>
-<li>附上廖雪峰的Git经典入门教程: <a href="http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000" target="_blank" rel="external">Git入门教程</a> </li>
-</ol>
-<h3 id="注册-GitHub"><a href="#注册-GitHub" class="headerlink" title="注册 GitHub"></a>注册 GitHub</h3><blockquote>
-<p>老手和已注册过的用户略    </p>
-</blockquote>
-<ol>
-<li>打开GitHub官网：<a href="打开GitHub官网：https://github.com/">https://github.com/</a></li>
-<li>填写注册信息进行注册操作：没有登录的用户打开网站首页就会显示注册的操作（如图所示），或者是点击Sign up按钮进入注册详情页。     <img src="/2016/12/05/Hexo环境搭建/github-signup.png" alt="GitHub注册" title="GitHub注册">      </li>
-<li>填写好注册信息，点击Sign up for GitHub(注册)按钮后，接下来是选择协议部分。根据自己的情况选择相关的协议，一般人选的都是免费的那一项。</li>
-</ol>
-<h3 id="创建仓库"><a href="#创建仓库" class="headerlink" title="创建仓库"></a>创建仓库</h3><ol>
-<li>登录github账号：在github首页点击Sign in按钮进入登录页面。填写用户名或邮箱和密码，点击Sign in按钮登录。     <img src="/2016/12/05/Hexo环境搭建/github-login.png" alt="登录GitHub" title="登录GitHub"></li>
-<li>点击创建仓库：点击在登录的用户图像左边的+号和下三角符号按钮。     <img src="/2016/12/05/Hexo环境搭建/github-newrepository.png" alt="点击创建仓库" title="点击创建仓库">      </li>
-<li>填写创建仓库信息：<br>仓库名称必须是用户名.github.io（别问我为什么，人家就是这样规定的），比如我的用户名是wgfxcu，就是wgfxcu.github.io。       <img src="/2016/12/05/Hexo环境搭建/github-repositoryinfo.png" alt="填写创建仓库信息" title="填写创建仓库信息">          </li>
-<li>填写好相关信息，点击<strong>Create repository(创建仓库)</strong>按钮。   </li>
-</ol>
-<h3 id="配置-SSH"><a href="#配置-SSH" class="headerlink" title="配置 SSH"></a>配置 SSH</h3><blockquote>
-<p>老手和已注册过的用户略   </p>
-</blockquote>
-<ol>
-<li>打开Git Bash终端：在桌面右键，会出现”Git Bash here”的选项，点击即可。 </li>
-<li><p>设置user name和email：     </p>
-<pre><code>$ git config --global user.name &quot;你的GitHub用户名&quot;          
-$ git config --global user.email &quot;你的GitHub注册邮箱&quot;         
-</code></pre></li>
-<li><p>生成ssh密钥:输入下面命令         </p>
-<pre><code>$ ssh-keygen -t rsa -C &quot;你的GitHub注册邮箱&quot;         
-</code></pre><p> 一般情况下是不需要密码的，所以，接下来直接回车就好。<br> 此时，在用户文件夹下就会有一个新的文件夹.ssh，里面有刚刚创建的ssh密钥文件id_rsa和id_rsa.pub。<br> <em>注：id_rsa文件是私钥，要妥善保管，id_rsa.pub是公钥文件.</em></p>
-</li>
-<li><p>添加公钥到github：<br> 点击用户头像，然后点击显示的Settings(设置)选项；     </p>
- <img src="/2016/12/05/Hexo环境搭建/github-setting.png" alt="Settings" title="Settings">        
-<p> 在用户设置栏，点击SSH and GPG keys选项，然后点击New SSH key(新建SSH)按钮；    </p>
- <img src="/2016/12/05/Hexo环境搭建/github-sshkeys.png" alt="SSH and GPG keys" title="SSH and GPG keys">   
-<p> 将id_rsa.pub中的内容复制到Key文本框中，然后点击Add SSH key(添加SSH)按钮；    </p>
- <img src="/2016/12/05/Hexo环境搭建/githug-addsshkeys.png" alt="Add SSH keys" title="Add SSH keys">   
-</li>
-<li><p>测试 SSH:</p>
-<pre><code>$ ssh -T git@github.com    
-</code></pre><p> 接下来会出来下面的确认信息：    </p>
-<pre><code>The authenticity of host &apos;github.com (207.97.227.239)&apos; can&apos;t be established.    
-RSA key fingerprint is 17:24:ac:a5:76:28:24:36:62:1b:36:4d:eb:df:a6:45.      
-Are you sure you want to continue connecting (yeso)?
-</code></pre><p> 输入yes后回车。<br> 然后显示如下信息则OK(其中的SeayXu是用户名)。         </p>
-<pre><code>Hi wgfxcu! You&apos;ve successfully authenticated, 
-but GitHub does not provide shell access.
-</code></pre></li>
-</ol>
-<h2 id="搭建-Node-js-开发环境"><a href="#搭建-Node-js-开发环境" class="headerlink" title="搭建 Node.js 开发环境"></a>搭建 Node.js 开发环境</h2><p>本次没有使用ubuntu自带的nodejs版本，实在是版本太低。也没有使用源码进行安装，实在是太麻烦。根据<a href="https://hexo.io/zh-cn/docs/index.html" target="_blank" rel="external">Hexo官方文档</a>使用<a href="https://github.com/creationix/nvm" target="_blank" rel="external">nvm</a>管理和安装Node.js。<br>nvm 的全称是 Node Version Manager，之所以需要这个工具，是因为 Node.js 的各种特性都没有稳定下来，所以我们经常由于老项目或尝新的原因，需要切换各种版本。</p>
-<h3 id="安装-nvm"><a href="#安装-nvm" class="headerlink" title="安装 nvm"></a>安装 nvm</h3><p>cURL:</p>
-<pre><code>$ curl https://raw.github.com/creationix/nvm/master/install.sh | sh
-</code></pre><p>Wget:</p>
-<pre><code>$ wget -qO- https://raw.github.com/creationix/nvm/master/install.sh | sh
-</code></pre><p>脚本下载nvm仓库下载到 <code>~/.nvm</code> , 同时在你的配置文件中添加源代码行 <code>(~/.bash_profile, ~/.zshrc, ~/.profile, or ~/.bashrc)</code>。           </p>
-<pre><code>export NVM_DIR=&quot;$HOME/.nvm&quot;
-[ -s &quot;$NVM_DIR/nvm.sh&quot; ] &amp;&amp; . &quot;$NVM_DIR/nvm.sh&quot; # This loads nvm
-</code></pre><p>如果你在shell命令行中输入nvm，得到的是 <code>nvm: command not found</code>。你需要在命令行中执行以下命令：</p>
-<pre><code>source ~/.bashrc
-</code></pre><h3 id="安装切换各版本-node-npm"><a href="#安装切换各版本-node-npm" class="headerlink" title="安装切换各版本 node/npm"></a>安装切换各版本 node/npm</h3><pre><code>nvm install stable #安装最新稳定版 node，现在是 v7.2.0
-nvm install 6.0.0 #安装 6.0.0 版本
-nvm install 0.12.7 #安装 0.12.7 版本
+          前言之前无意中发现conglang的github博客，简洁干净，符合我的style。后来发现他使用HEXO+GitHub+Next主题搭建的。按耐不住就索性自己也来一个。同时也记录一下自己的实现过程，做个备案。
+推荐理由:
+免费：github提供gh-pages服务是免费的，有300MB空间；   
+          ...
 
-# 特别说明：以下模块安装仅供演示说明，并非必须安装模块
-nvm use 0 #切换至 0.12.7 版本
-nvm use 6 #切换至 6.0.0 版本
-nvm alias default 7.2.0 #设置默认 node 版本为 7.2.0
-</code></pre><p>这时候可以看到自己安装的所有 Node.js 版本，输出应如下：<br><img src="/2016/12/05/Hexo环境搭建/nvm-node.png" alt="查看node版本" title="查看node版本">     </p>
-<h3 id="使用-nvmrc-文件配置项目所使用的-node-版本"><a href="#使用-nvmrc-文件配置项目所使用的-node-版本" class="headerlink" title="使用 .nvmrc 文件配置项目所使用的 node 版本"></a>使用 .nvmrc 文件配置项目所使用的 node 版本</h3><p>如果你的默认 node 版本（通过 nvm alias 命令设置的）与项目所需的版本不同，则可在项目根目录或其任意父级目录中创建 .nvmrc 文件，在文件中指定使用的 node 版本号，例如：   </p>
-<pre><code>cd &lt;项目根目录&gt;  #进入项目根目录
-echo 7 &gt; .nvmrc #添加 .nvmrc 文件
-nvm use #无需指定版本号，会自动使用 .nvmrc 文件中配置的版本
-node -v #查看 node 是否切换为对应版本
-</code></pre><h3 id="nvm-与-n-的区别"><a href="#nvm-与-n-的区别" class="headerlink" title="nvm 与 n 的区别"></a>nvm 与 n 的区别</h3><p>node 版本管理工具还有一个是 <em><a href="https://github.com/tj/n" target="_blank" rel="external">TJ 大神的 n</a></em> 命令，n 命令是作为一个 node 的模块而存在，而 nvm 是一个独立于 node/npm 的外部 shell 脚本，因此 n 命令相比 nvm 更加局限。</p>
-<p>由于 npm 安装的模块路径均为 <code>/usr/local/lib/node_modules</code> ，当使用 n 切换不同的 node 版本时，实际上会共用全局的 node/npm 目录。 因此不能很好的满足『按不同 node 版本使用不同全局 node 模块』的需求。</p>
-<p>因此建议各位尽早开始使用 nvm ，以免出现全局模块无法更新的问题。关于 <code>nvm</code> 和 <code>n</code> 详细区别可以参考<a href="http://taobaofed.org/blog/2015/11/17/nvm-or-n/" target="_blank" rel="external">淘宝前端团队(FED)</a>博客。</p>
-<p>### </p>
-
-          
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/12/05/Hexo环境搭建/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
         
       
     </div>
