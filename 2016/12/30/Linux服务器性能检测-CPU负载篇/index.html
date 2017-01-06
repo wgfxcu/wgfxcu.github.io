@@ -75,7 +75,10 @@
 19:26:17 up 4">
 <meta property="og:image" content="http://yoursite.com/2016/12/30/Linux服务器性能检测-CPU负载篇/top.png">
 <meta property="og:image" content="http://yoursite.com/2016/12/30/Linux服务器性能检测-CPU负载篇/iotop.png">
-<meta property="og:updated_time" content="2017-01-03T01:54:42.296Z">
+<meta property="og:image" content="http://yoursite.com/2016/12/30/Linux服务器性能检测-CPU负载篇/top-h.png">
+<meta property="og:image" content="http://yoursite.com/2016/12/30/Linux服务器性能检测-CPU负载篇/top-p.png">
+<meta property="og:image" content="http://yoursite.com/2016/12/30/Linux服务器性能检测-CPU负载篇/pstack.png">
+<meta property="og:updated_time" content="2017-01-06T03:08:16.326Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Linux服务器性能检测-CPU负载篇">
 <meta name="twitter:description" content="查看系统负载查看系统负载的工具: uptime、w 等。系统平均负载时处于运行或不可打扰状态的进程的平均数     
@@ -412,6 +415,21 @@ Linux 3.13.0-55-generic (ISeR-Server1)     08/08/2015     _x86_64_    (4 CPU)
 12:45:01 AM     all      3.25      0.02      1.35      0.55      0.00     94.83
 12:55:01 AM     all      3.36      0.02      1.77      0.56      0.00     94.29
 </code></pre><p>sysstat工具只存储1个月内的系统使用记录，每天的记录以saN为文件名保存在相应的日志目录中，这里我们查看本月8号的CPU使用记录。</p>
+<h2 id="CPU占高排查"><a href="#CPU占高排查" class="headerlink" title="CPU占高排查"></a>CPU占高排查</h2><h3 id="使用top命令查看占比高的进程"><a href="#使用top命令查看占比高的进程" class="headerlink" title="使用top命令查看占比高的进程"></a>使用top命令查看占比高的进程</h3><img src="/2016/12/30/Linux服务器性能检测-CPU负载篇/top-h.png" alt="top-h" title="top-h">         
+<h3 id="用top-H-p-pid命令查看进程内各个线程占用的CPU百分比"><a href="#用top-H-p-pid命令查看进程内各个线程占用的CPU百分比" class="headerlink" title="用top -H -p pid命令查看进程内各个线程占用的CPU百分比"></a>用top -H -p pid命令查看进程内各个线程占用的CPU百分比</h3><img src="/2016/12/30/Linux服务器性能检测-CPU负载篇/top-p.png" alt="top-p" title="top-p">                          
+<h3 id="查看进程中各线程的函数调用栈"><a href="#查看进程中各线程的函数调用栈" class="headerlink" title="查看进程中各线程的函数调用栈"></a>查看进程中各线程的函数调用栈</h3><ol>
+<li><p>使用pstack pid 查看进程中各县城的函数调用栈</p>
+ <img src="/2016/12/30/Linux服务器性能检测-CPU负载篇/pstack.png" alt="pstack" title="pstack">       
+</li>
+<li><p>使用gdb            </p>
+<p> 可以使用gcore命令转存进程映像及内存上下文:<br> #gcore 14094<br> 该命令生成core文件core.14094<br> 然后使用gdb调试core文件，使用info threads 查看具体的所有线程，thread <threadno> –切换到threadno的线程，使用bt命令可以查看当前线程的函数调用栈        </threadno></p>
+<p> 也可以使用gdb 然后attach pid ，然后再使用 thread apply all bt 查看所有线程的函数调用栈。          </p>
+</li>
+<li><p>用strace命令查看系统调用和花费的时间            </p>
+<p> #strace -T -r -c -p pid<br> -c 参数显示统计信息，去掉此参数可以查看每隔系统调用花费的时间及返回值        </p>
+</li>
+</ol>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>处理CPU占比高的流程: 进程ID-&gt;线程ID-&gt;线程函数调用栈-&gt;函数耗时和调用统计-&gt;源代码分析          </p>
 
       
     </div>
@@ -565,7 +583,7 @@ Linux 3.13.0-55-generic (ISeR-Server1)     08/08/2015     _x86_64_    (4 CPU)
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#查看系统负载"><span class="nav-number">1.</span> <span class="nav-text">查看系统负载</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#top-命令"><span class="nav-number">1.1.</span> <span class="nav-text">top 命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#iostat-命令"><span class="nav-number">1.2.</span> <span class="nav-text">iostat 命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#iotop-命令"><span class="nav-number">1.3.</span> <span class="nav-text">iotop 命令</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#sysstat工具与负载历史回放"><span class="nav-number">2.</span> <span class="nav-text">sysstat工具与负载历史回放</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#sar命令查看CPU、内存和磁盘记录"><span class="nav-number">2.1.</span> <span class="nav-text">sar命令查看CPU、内存和磁盘记录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用sar查看指定时间、制定日期的历史记录"><span class="nav-number">2.2.</span> <span class="nav-text">使用sar查看指定时间、制定日期的历史记录</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#查看系统负载"><span class="nav-number">1.</span> <span class="nav-text">查看系统负载</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#top-命令"><span class="nav-number">1.1.</span> <span class="nav-text">top 命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#iostat-命令"><span class="nav-number">1.2.</span> <span class="nav-text">iostat 命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#iotop-命令"><span class="nav-number">1.3.</span> <span class="nav-text">iotop 命令</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#sysstat工具与负载历史回放"><span class="nav-number">2.</span> <span class="nav-text">sysstat工具与负载历史回放</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#sar命令查看CPU、内存和磁盘记录"><span class="nav-number">2.1.</span> <span class="nav-text">sar命令查看CPU、内存和磁盘记录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用sar查看指定时间、制定日期的历史记录"><span class="nav-number">2.2.</span> <span class="nav-text">使用sar查看指定时间、制定日期的历史记录</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CPU占高排查"><span class="nav-number">3.</span> <span class="nav-text">CPU占高排查</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用top命令查看占比高的进程"><span class="nav-number">3.1.</span> <span class="nav-text">使用top命令查看占比高的进程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#用top-H-p-pid命令查看进程内各个线程占用的CPU百分比"><span class="nav-number">3.2.</span> <span class="nav-text">用top -H -p pid命令查看进程内各个线程占用的CPU百分比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看进程中各线程的函数调用栈"><span class="nav-number">3.3.</span> <span class="nav-text">查看进程中各线程的函数调用栈</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">3.4.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
             
           </div>
         </section>
